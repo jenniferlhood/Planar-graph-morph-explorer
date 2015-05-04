@@ -37,8 +37,8 @@ class pgmeMain(object):
 		self.aList = [[self.vList[1],self.vList[2]], \
 			[self.vList[0],self.vList[2]],[self.vList[0],self.vList[1]]]
 		
-		# selected vertex (a tuple of indices)
-		verSelect = (None,None)
+		# selected vertex 
+		self.verSelect = None
 
 		#after initialization, run the main program loop
 		self.event_loop()
@@ -53,8 +53,11 @@ class pgmeMain(object):
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				#for a left click, add a vertex at the clicked coordinate				
 				if pygame.mouse.get_pressed() == (1,0,0):
-					self.vList.append(pygame.mouse.get_pos())
-				
+					
+					if self.verSelect is None:
+						self.vList.append(pygame.mouse.get_pos())
+						self.aList.append([])
+					
 				#select two vertices to connect with an edge
 				elif pygame.mouse.get_pressed() == (0,0,1):
 					pos = pygame.mouse.get_pos()
@@ -63,8 +66,11 @@ class pgmeMain(object):
 						if (i[0] - 10) < pos[0] < (i[0] + 10) and \
 							(i[1] - 10) < pos[1] < (i[1] + 10):
 
-							self.verSelect[0] == self.vlist.index(i)
-
+							if self.verSelect is None:
+								self.verSelect = self.vList.index(i)
+							else:
+								self.aList[self.verSelect].append(i)
+								self.verSelect = None	
 
 			elif event.type == self.REFRESH:
 				self.draw()
@@ -91,15 +97,15 @@ class pgmeMain(object):
 
 			
 		#highlight the first selected vertex and draw the prospective edge
-		if self.verSelect[0] is not None:
-			vertex = self.verSelect[0]
+		if self.verSelect is not None:
+			vertex = self.verSelect
 			edge = pygame.mouse.get_pos()
 			
 			#redraw the selected vertex in a distinct colour
-			pygame.draw.circle(self.screen,PEA,self.vList(vertex)
+			pygame.draw.circle(self.screen,PEA,self.vList[vertex],8)
 			
 			#draw the prospective edge in a distinct colour
-			pygame.draw.line(self.screen,CORAL,self.vList(vertex),edge,2)
+			pygame.draw.line(self.screen,CORAL,self.vList[vertex],edge,2)
 
 
 		pygame.display.flip()
