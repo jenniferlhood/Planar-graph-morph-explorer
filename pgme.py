@@ -39,7 +39,7 @@ class pgmeMain(object):
 		
 		# selected vertex 
 		self.verSelect = None
-
+	
 		#after initialization, run the main program loop
 		self.event_loop()
 	
@@ -51,27 +51,53 @@ class pgmeMain(object):
 			if event.type == pygame.QUIT:
 				sys.exit()
 			elif event.type == pygame.MOUSEBUTTONDOWN:
+				pos = pygame.mouse.get_pos()
+				pressed = pygame.mouse.get_pressed()
+		
 				#for a left click, add a vertex at the clicked coordinate				
-				if pygame.mouse.get_pressed() == (1,0,0):
+				if pressed ==  (0,0,1):
 					
 					if self.verSelect is None:
-						self.vList.append(pygame.mouse.get_pos())
+						self.vList.append(pos)
 						self.aList.append([])
+					else:
+						self.verSelect = None
+				
+				elif pressed == (1,0,0):
 					
-				#select two vertices to connect with an edge
-				elif pygame.mouse.get_pressed() == (0,0,1):
-					pos = pygame.mouse.get_pos()
+				
+				
+					for i in self.vList:
+						if (i[0] - 10) < pos[0] < (i[0] + 10) and \
+							(i[1] - 10) < pos[1] < (i[1] + 10):
+						
+							i = pygame.mouse.get_pos()
+							
+				#				if self.verSelect is None:
+				#					self.verSelect = self.vList.index(i)
+				#				else:
+				#					if self.vList[self.verSelect] != i:
+				#						self.aList[self.verSelect].append(i)
+				#						self.verSelect = None	
+					
+					
+							
+			#select two vertices to connect with an edge
+			elif event.type == pygame.MOUSEBUTTONUP:		
+				if pressed == (1,0,0):
 					
 					for i in self.vList:
 						if (i[0] - 10) < pos[0] < (i[0] + 10) and \
 							(i[1] - 10) < pos[1] < (i[1] + 10):
-
-							if self.verSelect is None:
-								self.verSelect = self.vList.index(i)
-							else:
-								self.aList[self.verSelect].append(i)
-								self.verSelect = None	
-
+						
+								if self.verSelect is None:
+									self.verSelect = self.vList.index(i)
+								else:
+									if self.vList[self.verSelect] != i and i not in\
+											self.aList[self.verSelect]:
+											
+										self.aList[self.verSelect].append(i)
+										self.verSelect = None			
 			elif event.type == self.REFRESH:
 				self.draw()
 			else:
