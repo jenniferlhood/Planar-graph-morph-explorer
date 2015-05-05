@@ -11,7 +11,7 @@ AQUA = (100,200,200)
 LAV = (100,100,200)
 PEA = (100,200,100)
 CORAL = (200,100,100)
-
+CHALK = (200,200,200)
 
 class pgmeMain(object):
 	def __init__(self):
@@ -27,6 +27,13 @@ class pgmeMain(object):
 
 		
 		#program variables
+		#font
+		fontfile = pygame.font.match_font('helvetica')
+		self.font = pygame.font.Font(fontfile,16)
+		
+		self.controls = \
+			self.font.render("[Controls] | [mouse left: select vertex] | [mouse right: add vertex] | [d : delete graph]",True, CHALK)
+		
 		#vertex list 
 		self.vList = [(100,100),(300,500),(500,300)]
 		
@@ -107,6 +114,10 @@ class pgmeMain(object):
 	def draw(self):
 		self.screen.fill((0,0,0))
 		
+		
+		
+		# draw graph elements
+		
 		for i in self.vList:
 				pygame.draw.circle(self.screen,AQUA,i,10)
 
@@ -120,8 +131,7 @@ class pgmeMain(object):
 				pygame.draw.line(self.screen,LAV,self.vList[vIndexCount],j, 2)
 			vIndexCount += 1
 
-
-			
+	
 		#highlight the first selected vertex and draw the prospective edge
 		if self.verSelect is not None:
 			vertex = self.verSelect
@@ -132,7 +142,13 @@ class pgmeMain(object):
 			
 			#draw the prospective edge in a distinct colour
 			pygame.draw.line(self.screen,CORAL,self.vList[vertex],edge,2)
-
-
+		
+		
+		
+		# draw controls
+		rect = self.controls.get_rect()
+		rect = rect.move(0,self.height-20)
+		self.screen.blit(self.controls,rect)
+		
 		pygame.display.flip()
 pgmeMain()
