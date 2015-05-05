@@ -92,7 +92,7 @@ class pgmeMain(object):
 						for i in self.vList1:
 							if ((i[0] - 10) < pos[0] < (i[0] + 10)) and \
 									((i[1] - 10) < pos[1] < (i[1] + 10)):
-										add = False
+								add = False
 						if add == True:
 							self.vList1.append(pos)
 							self.aList1.append([])
@@ -119,12 +119,12 @@ class pgmeMain(object):
 				if pressed == (1,0,0) and self.gcurrent == 1:				
 					for i in self.vList1:
 						if (i[0] - 10) < pos[0] < (i[0] + 10) and \
-							(i[1] - 10) < pos[1] < (i[1] + 10):
+								(i[1] - 10) < pos[1] < (i[1] + 10):
 							
 							if self.verSelect is None:
 								self.verSelect = self.vList1.index(i)
 							elif self.verSelect is not None and self.vList1[self.verSelect] != i\
-								 and i not in self.aList1[self.verSelect]:
+									 and i not in self.aList1[self.verSelect]:
 											
 								self.aList1[self.verSelect].append(i)
 								self.verSelect = None	
@@ -158,7 +158,22 @@ class pgmeMain(object):
 					self.gwidth = [0,self.width/2]
 					self.gcurrent = 1
 					self.verSelect = None
+			
+			elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
+				if self.gcurrent == 1 and self.vList1 != []:
+					self.vList2 = []
+					self.aList2 = []
+					indexCount = 0
 					
+					for i in self.vList1:
+						g2v = (i[0]+int(self.width/2),i[1])
+						self.vList2.append(g2v)
+						self.aList2.append([])
+						for j in self.aList1[indexCount]:
+							g2a = (j[0]+int(self.width/2),j[1])
+							self.aList2[indexCount].append(g2a)
+						indexCount += 1
+							
 			elif event.type == self.REFRESH:
 				self.draw()
 			else:
