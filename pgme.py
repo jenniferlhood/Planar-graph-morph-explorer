@@ -32,7 +32,7 @@ class pgmeMain(object):
 		self.font = pygame.font.Font(fontfile,16)
 		
 		self.controls = \
-			self.font.render("[Controls] | [mouse left: select vertex] | [mouse right: add vertex] | [d : delete graph]",True, CHALK)
+			self.font.render("[Controls] | [mouse left : select vertex] | [mouse right : add vertex] | [d : delete graph]",True, CHALK)
 		
 		#vertex list 
 		self.vList = [(100,100),(300,500),(500,300)]
@@ -104,7 +104,13 @@ class pgmeMain(object):
 											self.aList[self.verSelect]:
 											
 										self.aList[self.verSelect].append(i)
-										self.verSelect = None			
+										self.verSelect = None		
+										
+										
+			elif event.type == pygame.KEYDOWN and event.key == pygame.K_d:
+				self.vList = []
+				self.aList = []
+					
 			elif event.type == self.REFRESH:
 				self.draw()
 			else:
