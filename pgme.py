@@ -79,6 +79,7 @@ class PgmeMain(object):
 			event = pygame.event.wait()
 			pos = pygame.mouse.get_pos()
 		
+	
 
 			if event.type == pygame.QUIT:
 				sys.exit()
@@ -116,27 +117,13 @@ class PgmeMain(object):
 								self.selected_index = self.v_list2.index(i)
 								self.move_vertex = True
 
-				elif pressed == (0,0,1) and self.gwidth[0] < pos[0] < self.gwidth[1]\
-					 and 0 < pos[1] < self.height-20 and self.current_graph == 1:	
 
-					for i in self.v_list1:
-						if (i.xy[0] - 10) < pos[0] < (i.xy[0] + 10) and \
-								(i.xy[1] - 10) < pos[1] < (i.xy[1] + 10):
-							
-							if self.selected_index is None:
-								self.selected_index = self.v_list1.index(i)
-
-							elif self.selected_index is not None and self.v_list1[self.selected_index] != i\
-									 and i not in self.a_list1[self.selected_index]:
-			
-								self.a_list1[self.selected_index].append(i)
-								self.selected_index = None
 
 		
 			#when a moved vertex is "dropped"
 			elif event.type == pygame.MOUSEBUTTONUP:
 
-							
+				
 				if pressed == (1,0,0) and self.move_vertex and \
 						self.gwidth[0] < pos[0] < self.gwidth[1] and \
 						0 < pos[1] < self.height-20:
@@ -150,7 +137,29 @@ class PgmeMain(object):
 						self.selected_index = None
 						self.move_vertex = False
 
-	
+					
+				elif pressed == (0,0,1) and self.current_graph == 1 \
+					 and self.gwidth[0] < pos[0] < self.gwidth[1] and \
+					 0 < pos[1] < self.height-20:
+					
+
+					for i in self.v_list1:
+						if (i.xy[0] - 10) < pos[0] < (i.xy[0] + 10) and \
+								(i.xy[1] - 10) < pos[1] < (i.xy[1] + 10):
+							
+							if self.selected_index is None:
+								self.selected_index = self.v_list1.index(i)
+
+							elif self.selected_index is not None:
+									# and self.v_list1[self.selected_index] != i\
+									 #and i not in self.a_list1[self.selected_index]:
+								self.a_list1[self.selected_index].append(i)
+								self.a_list1[self.v_list1.index(i)].append(self.v_list1[self.selected_index])
+								print len(self.a_list1[self.selected_index])
+								self.selected_index = None
+
+								
+				
 					
 	#		elif pressed == (1,0,0) and self.current_graph ==2:
 	#				for i in self.v_list2:
@@ -263,7 +272,7 @@ class PgmeMain(object):
 				pygame.draw.circle(self.screen,AQUA,i.xy,8)
 				
 			else:
-				if pygame.mouse.get_pressed() ==(1,0,0) and self.move_vertex:
+				if pygame.mouse.get_pressed() == (1,0,0) and self.move_vertex:
 					pygame.draw.circle(self.screen,PEA,pos,8)
 				else:
 					pygame.draw.circle(self.screen,PEA,i.xy,8)
@@ -274,31 +283,49 @@ class PgmeMain(object):
 		# Draw the edges of adjacent vertecies:
 		# Draw a line from the i,jth vertex in the a_list 
 		# to each of the vertexes listed in the corresponding ith vertex in the v_list
-		vIndexCount = 0
-
-		for i in self.a_list1:
-			
-			for j in i:
-				if j is not selected_vertex and self.v_list1[vIndexCount] is not selected_vertex:
-					
-						pygame.draw.line(self.screen,LAV,self.v_list1[vIndexCount].xy,j.xy, 2)
-				else:
-					for j in self.a_list1[self.selected_index]:
-						pygame.draw.line(self.screen,LAV,pos,j.xy, 2)
-			vIndexCount += 1
-			
-		vIndexCount = 0	
-		for i in self.a_list2:
-			
-			for j in i:
-				if j is not selected_vertex and self.v_list2[vIndexCount] is not selected_vertex:
-					
-						pygame.draw.line(self.screen,LAV,self.v_list2[vIndexCount].xy,j.xy, 2)
-				else:
-					for j in self.a_list2[self.selected_index]:
-						pygame.draw.line(self.screen,LAV,pos,j.xy, 2)
-			vIndexCount += 1
-
 		
+
+		if self.move_vertex:
+			index_counter = 0
+			for i in self.a_list1:
+			
+				for j in i:
+					if j is not selected_vertex and self.v_list1[index_counter] is not selected_vertex:
+					
+							pygame.draw.line(self.screen,LAV,self.v_list1[index_counter].xy,j.xy, 2)
+					else:
+						for j in self.a_list1[self.selected_index]:
+							pygame.draw.line(self.screen,LAV,pos,j.xy, 2)
+				index_counter += 1
+			
+
+			index_counter = 0	
+			for i in self.a_list2:
+			
+				for j in i:
+					if j is not selected_vertex and self.v_list2[index_counter] is not selected_vertex:
+					
+							pygame.draw.line(self.screen,LAV,self.v_list2[index_counter].xy,j.xy, 2)
+					else:
+						for j in self.a_list2[self.selected_index]:
+							pygame.draw.line(self.screen,LAV,pos,j.xy, 2)
+				index_counter += 1
+	
+
+		else:
+			index_counter = 0
+			for i in self.a_list1:
+				for j in i:
+					pygame.draw.line(self.screen,LAV,self.v_list1[index_counter].xy,j.xy, 2)
+
+				index_counter += 1
+
+			index_counter = 0
+			for i in self.a_list2:
+				for j in i:
+					pygame.draw.line(self.screen,LAV,self.v_list2[index_counter].xy,j.xy, 2)
+
+				index_counter += 1
+
 
 PgmeMain()
