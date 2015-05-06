@@ -64,9 +64,12 @@ class PgmeMain(object):
 		self.a_list2 = []
 		
 		
-		# selected vertex 
+		# selected vertices 
 		self.selected_index = None
 		self.move_vertex = False
+
+		#ready to morph switch
+		self.morph = False
 	
 	
 		#after initialization, run the main program loop
@@ -150,31 +153,17 @@ class PgmeMain(object):
 							if self.selected_index is None:
 								self.selected_index = self.v_list1.index(i)
 
-							elif self.selected_index is not None:
-									# and self.v_list1[self.selected_index] != i\
-									 #and i not in self.a_list1[self.selected_index]:
+							elif self.selected_index is not None and self.v_list1[self.selected_index] != i\
+									 and i not in self.a_list1[self.selected_index]:
 								self.a_list1[self.selected_index].append(i)
 								self.a_list1[self.v_list1.index(i)].append(self.v_list1[self.selected_index])
 								print len(self.a_list1[self.selected_index])
 								self.selected_index = None
-
-								
-				
-					
-	#		elif pressed == (1,0,0) and self.current_graph ==2:
-	#				for i in self.v_list2:
-	#					if (i.xy[0] - 10) < pos[0] < (i.xy[0] + 10) and \
-	#						(i.xy[1] - 10) < pos[1] < (i.xy[1] + 10):
-	#						print "yes G2"
-	#						
-	#						if self.selected_index is None:
-	#							self.selected_index = self.v_list2.index(i)
-	#						elif self.selected_index is not None and self.v_list2[self.selected_index] != i\
-	#							 and i not in self.a_list2[self.selected_index]:
-											
-	#							self.a_list2[self.selected_index].append(i)
-	#							self.selected_index = None		
-										
+								# after adding edges to g1, the graphs are no longer similar,
+								# so morphing cannot occur.								
+								self.morph = False 
+							else:
+								self.selected_index = None
 			elif event.type == pygame.KEYDOWN and event.key == pygame.K_d:
 				self.v_list1 = []
 				self.a_list1 = []
@@ -192,7 +181,9 @@ class PgmeMain(object):
 					self.selected_index = None
 			
 			elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
+				
 				if self.current_graph == 1 and self.v_list1 != []:
+					self.morph = True	#after cloning, the graphs are similar, thus morphing can happen				
 					self.v_list2 = []
 					self.a_list2 = []
 					indexCount = 0
@@ -207,6 +198,11 @@ class PgmeMain(object):
 							self.a_list2[indexCount].append(self.v_list2[self.v_list1.index(j)])
 
 						indexCount += 1
+
+			elif event.type == pygame.KEYDOWN and event.key == pygame.K_m:
+				if self.morph:
+					pass 
+					#do the morph
 							
 			elif event.type == self.REFRESH:
 				self.draw()
@@ -284,7 +280,6 @@ class PgmeMain(object):
 		# Draw a line from the i,jth vertex in the a_list 
 		# to each of the vertexes listed in the corresponding ith vertex in the v_list
 		
-
 		if self.move_vertex:
 			index_counter = 0
 			for i in self.a_list1:
