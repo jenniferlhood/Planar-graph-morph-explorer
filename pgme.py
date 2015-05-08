@@ -25,8 +25,8 @@ class PgmeMain(object):
 	def __init__(self):
 
 		pygame.init()
-		self.width = 900
-		self.height = 500
+		self.width = 1500
+		self.height = 700
 		self.screen = pygame.display.set_mode((self.width, self.height))
 	
 		self.FPS = 30
@@ -38,7 +38,7 @@ class PgmeMain(object):
 		#program variables
 		#font
 		fontfile = pygame.font.match_font('helvetica')
-		self.font = pygame.font.Font(fontfile,16)
+		self.font = pygame.font.Font(fontfile,20)
 		msg1 = "mouse left : add/move vertex  |  mouse right : connect vertex  "
 		msg2 = "| c : clone "
 		msg3 =	"|  s : switch graph  |  d : delete  |  m : morph "
@@ -82,8 +82,6 @@ class PgmeMain(object):
 			event = pygame.event.wait()
 			pos = pygame.mouse.get_pos()
 		
-	
-
 			if event.type == pygame.QUIT:
 				sys.exit()
 
@@ -157,17 +155,24 @@ class PgmeMain(object):
 									 and i not in self.a_list1[self.selected_index]:
 								self.a_list1[self.selected_index].append(i)
 								self.a_list1[self.v_list1.index(i)].append(self.v_list1[self.selected_index])
-								print len(self.a_list1[self.selected_index])
+							
 								self.selected_index = None
 								# after adding edges to g1, the graphs are no longer similar,
 								# so morphing cannot occur.								
 								self.morph = False 
 							else:
 								self.selected_index = None
+
+
 			elif event.type == pygame.KEYDOWN and event.key == pygame.K_d:
-				self.v_list1 = []
-				self.a_list1 = []
 				
+				if self.current_graph == 1:
+					self.v_list1 = []
+					self.a_list1 = []
+				elif self.current_graph ==2:
+					self.v_list2 = []
+					self.a_list2 = []
+
 			elif event.type == pygame.KEYDOWN and event.key == pygame.K_s:
 
 				if self.current_graph == 1:
@@ -199,6 +204,24 @@ class PgmeMain(object):
 
 						indexCount += 1
 
+				elif self.current_graph == 2 and self.v_list2!= []:
+					self.morph = True	#after cloning, the graphs are similar, thus morphing can happen				
+					self.v_list1 = []
+					self.a_list1 = []
+					indexCount = 0
+					
+					for i in self.v_list2:
+						g2v = (i.xy[0]-int(self.width/2),i.xy[1])
+						self.v_list1.append(Vertex(g2v))
+						self.a_list1.append([])
+
+					for i in self.v_list1:					
+						for j in self.a_list2[indexCount]:
+							self.a_list1[indexCount].append(self.v_list1[self.v_list2.index(j)])
+
+						indexCount += 1
+
+
 			elif event.type == pygame.KEYDOWN and event.key == pygame.K_m:
 				if self.morph:
 					pass 
@@ -222,8 +245,8 @@ class PgmeMain(object):
 
 	def draw_board(self):
 		#draw the primary and secondary view
-		rect_g1 = (0,0,self.width/2-2,self.height-20)
-		rect_g2 = (self.width/2,0,self.width/2-2,self.height-20)
+		rect_g1 = (0,0,self.width/2-2,self.height-50)
+		rect_g2 = (self.width/2,0,self.width/2-2,self.height-50)
 		
 		if self.current_graph == 1:
 			pygame.draw.rect(self.screen,SUN,rect_g1,4)
@@ -234,7 +257,7 @@ class PgmeMain(object):
 
 		# draw controls
 		rect = self.controls.get_rect()
-		rect = rect.move(5,self.height-20)
+		rect = rect.move(10,self.height-40)
 		self.screen.blit(self.controls,rect)
 
 
@@ -242,7 +265,7 @@ class PgmeMain(object):
 	def draw_graphs(self):
 		pos = pygame.mouse.get_pos()
 
-
+		#extract the selected vertex
 		if self.current_graph == 1 and self.selected_index is not None:
 			selected_vertex = self.v_list1[self.selected_index]
 		elif self.current_graph == 2 and self.selected_index is not None:
