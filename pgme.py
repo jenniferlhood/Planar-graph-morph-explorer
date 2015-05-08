@@ -260,8 +260,6 @@ class PgmeMain(object):
 		rect = rect.move(10,self.height-40)
 		self.screen.blit(self.controls,rect)
 
-
-
 	def draw_graphs(self):
 		pos = pygame.mouse.get_pos()
 
