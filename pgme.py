@@ -2,7 +2,7 @@ from __future__ import division
 import sys
 import math 
 import pygame
-
+import time
 
 
 # colour globals
@@ -38,13 +38,24 @@ class PgmeMain(object):
 		#program variables
 		#font
 		fontfile = pygame.font.match_font('helvetica')
-		self.font = pygame.font.Font(fontfile,20)
-		msg1 = "mouse left : add/move vertex  |  mouse right : connect vertex  "
-		msg2 = "| c : clone "
-		msg3 =	"|  s : switch graph  |  d : delete  |  m : morph "
-		self.controls = self.font.render(msg1+msg2+msg3,True, CHALK)
+		self.control_font = pygame.font.Font(fontfile,20)
+		self.msg_font = pygame.font.Font(fontfile,60)
+		msg1 = "mouse left : add/move vertex  |  mouse right : connect vertex    "
+		msg2 = "|    s : switch graph  |  c : clone current  |  d : delete   "
+		msg3 =	"|    f : save to file |  l: load from file   |    m : morph "
+		msg4 = "saved"
+		msg5 = "loaded"
+
+		self.controls = self.control_font.render(msg1+msg2+msg3,True, CHALK)
+		self.save_msg = self.msg_font.render(msg4,True,CHALK)
+		self.load_msg = self.msg_font.render(msg5,True,CHALK)
 		
-		
+		# save load varables
+		# displaying messages
+		self.save_load = 2 # 0 for neither; 1 to save, 2 for load
+		self.load_list = ["asdsd","asdjsjak","ajsdkasjkl","asdjkjkl","2015_5_8_132137.txt","2015_5_8_132137.txt","238912390","2015_5_8_132137.txt","2015_5_8_132137.txt","2015_5_8_132137.txt","2015_5_8_132137.txt","2015_5_8_132137.txt","2015_5_8_132137.txt","2015_5_8_132137.txt","2015_5_8_132137.txt","sad","sdad","dsjfhs","akdsa","askjd"]
+		self.timer = 0
+		self.pg_num = 0
 		# current graph variables (g1 or g2)
 		self.current_graph = 1 #(1 for g1 or 2 for g2)
 		self.gwidth = [0,self.width/2]
@@ -74,7 +85,32 @@ class PgmeMain(object):
 	
 		#after initialization, run the main program loop
 		self.event_loop()
-	
+
+
+	#returns a list with the number of vertices and edges in g1 and in g2
+	# in this order: [v_g1,e_g1,v_g2,e_g2]
+	def count_v_and_e(self):
+		v1 = len(self.v_list1)
+		e1 = len(reduce(lambda x,y: x + y, self.a_list1,[]))
+		v2 = len(self.v_list2)
+		e2 = len(reduce(lambda x,y: x + y, self.a_list2,[]))		
+		
+		return [v1,e1,v2,e2]
+
+	def v_list_coordinates(self,v_list):
+		return [i.xy for i in v_list]
+
+	def a_list_coordinates(self,a_list):
+		a_cord = []
+		index = 0
+		for i in a_list:
+			a_cord.append([])
+			for j in i:
+				a_cord[index].append(j.xy)
+			index += 1
+		return a_cord
+
+
 	def event_loop(self):
 
 		while True:
@@ -89,12 +125,15 @@ class PgmeMain(object):
 
 				pressed = pygame.mouse.get_pressed()
 		
-				#for a left click, add a vertex at the clicked coordinate (in the primary window)
-								
-				if pressed ==  (1,0,0) and self.gwidth[0] < pos[0] < self.gwidth[1]\
-						 and 0 < pos[1] < self.height-20:
-					
-					if self.selected_index is None and self.current_graph == 1: #add move vertex to current_graph 
+				#for a left click, 
+				# add a vertex at the clicked coordinate (in the primary window)
+				# (and only when the loadfile screen isn't displayed)				
+				if pressed ==  (1,0,0) and (self.gwidth[0]+10) < pos[0] < \
+								(self.gwidth[1]-10) and 0 < pos[1] < self.height-20\
+								 and self.save_load == 0:
+
+					#add move vertex to current_graph
+					if self.selected_index is None and self.current_graph == 1:  
 						add = True
 
 						# when a space without a vertex is clicked, a new vertex is 
@@ -111,6 +150,7 @@ class PgmeMain(object):
 							self.a_list1.append([])
 					
 					elif self.selected_index is None and self.current_graph == 2:
+										
 						for i in self.v_list2:
 							if ((i.xy[0] - 10) < pos[0] < (i.xy[0] + 10)) and \
 								((i.xy[1] - 10) < pos[1] < (i.xy[1] + 10)):
@@ -119,15 +159,30 @@ class PgmeMain(object):
 								self.move_vertex = True
 
 
-
-		
-			#when a moved vertex is "dropped"
+				elif pressed == (1,0,0) and self.save_load == 2:
+					#click the down button
+					if 2*self.width/3 -8 < pos[0] < \
+							2*self.width/3 + 8 and 2*self.height/3 - 8 <\
+							pos[1] < 2*self.height/3 + 8:
+						self.pg_num += 1
+	
+					#click on the desired file
+					if self.width/3 < pos[0] < self.width/2 \
+							and self.height/3 < pos[1] < 2*self.height/3:
+						print self.load_list[int(self.pg_num+\
+								(pos[1]-40-self.height/3)//20)]
+					
+					if self.width/2 < pos[0] < 2*self.width/3	\
+							and self.height/3 < pos[1] < 2*self.height/3:
+						print self.load_list[10+int(self.pg_num+\
+								(pos[1]-40-self.height/3)//20)]
 			elif event.type == pygame.MOUSEBUTTONUP:
 
-				
+				#when a moved vertex is "dropped", 
+				#  update the vertex list and adjacency list
 				if pressed == (1,0,0) and self.move_vertex and \
-						self.gwidth[0] < pos[0] < self.gwidth[1] and \
-						0 < pos[1] < self.height-20:
+						(self.gwidth[0]+10)< pos[0] < (self.gwidth[1]-10) and \
+						0 < pos[1] < self.height-40:
 					
 					if self.current_graph == 1:
 						self.v_list1[self.selected_index].xy = pos
@@ -140,7 +195,7 @@ class PgmeMain(object):
 
 					
 				elif pressed == (0,0,1) and self.current_graph == 1 \
-					 and self.gwidth[0] < pos[0] < self.gwidth[1] and \
+					 and (self.gwidth[0]+10) < pos[0] < (self.gwidth[1]-10) and \
 					 0 < pos[1] < self.height-20:
 					
 
@@ -151,13 +206,16 @@ class PgmeMain(object):
 							if self.selected_index is None:
 								self.selected_index = self.v_list1.index(i)
 
-							elif self.selected_index is not None and self.v_list1[self.selected_index] != i\
-									 and i not in self.a_list1[self.selected_index]:
+							elif self.selected_index is not None and \
+									self.v_list1[self.selected_index] != i\
+									and i not in self.a_list1[self.selected_index]:
+
 								self.a_list1[self.selected_index].append(i)
-								self.a_list1[self.v_list1.index(i)].append(self.v_list1[self.selected_index])
+								self.a_list1[self.v_list1.index(i)].append(\
+										self.v_list1[self.selected_index])
 							
 								self.selected_index = None
-								# after adding edges to g1, the graphs are no longer similar,
+								# after adding edges to g1 graphs are no longer similar,
 								# so morphing cannot occur.								
 								self.morph = False 
 							else:
@@ -188,7 +246,9 @@ class PgmeMain(object):
 			elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
 				
 				if self.current_graph == 1 and self.v_list1 != []:
-					self.morph = True	#after cloning, the graphs are similar, thus morphing can happen				
+					#after cloning, the graphs are similar, 
+					# thus morphing can happen									
+					self.morph = True	
 					self.v_list2 = []
 					self.a_list2 = []
 					indexCount = 0
@@ -200,12 +260,15 @@ class PgmeMain(object):
 
 					for i in self.v_list2:					
 						for j in self.a_list1[indexCount]:
-							self.a_list2[indexCount].append(self.v_list2[self.v_list1.index(j)])
+							self.a_list2[indexCount].append(\
+									self.v_list2[self.v_list1.index(j)])
 
 						indexCount += 1
 
 				elif self.current_graph == 2 and self.v_list2!= []:
-					self.morph = True	#after cloning, the graphs are similar, thus morphing can happen				
+					#after cloning, the graphs are similar, 
+					# thus morphing can happen					
+					self.morph = True					
 					self.v_list1 = []
 					self.a_list1 = []
 					indexCount = 0
@@ -217,11 +280,32 @@ class PgmeMain(object):
 
 					for i in self.v_list1:					
 						for j in self.a_list2[indexCount]:
-							self.a_list1[indexCount].append(self.v_list1[self.v_list2.index(j)])
+							self.a_list1[indexCount].append(\
+									self.v_list1[self.v_list2.index(j)])
 
 						indexCount += 1
 
+			elif event.type == pygame.KEYDOWN and event.key == pygame.K_f:
+				tm = time.localtime(time.time())
+				self.timer = time.time()
+				
+				filename = str(tm.tm_year) + "_" + str(tm.tm_mon) + "_" + \
+									str(tm.tm_mday) + "_" + str(tm.tm_hour) + \
+									str(tm.tm_min) + str(tm.tm_sec)
 
+				f = open(filename,"w")
+ 				f.write(str(self.count_v_and_e()) + "\n")
+				f.write(str(self.v_list_coordinates(self.v_list1)) + "\n")
+				f.write(str(self.a_list_coordinates(self.a_list1)) + "\n")
+				f.write(str(self.v_list_coordinates(self.v_list2)) + "\n")
+				f.write(str(self.a_list_coordinates(self.a_list2)) + "\n")
+				f.close()
+				self.save_load = 1
+
+			elif event.type == pygame.KEYDOWN and event.key == pygame.K_l:
+				pass #glob to read files into self.load_list
+						#determine number of files, can display 20 per page
+						
 			elif event.type == pygame.KEYDOWN and event.key == pygame.K_m:
 				if self.morph:
 					pass 
@@ -235,13 +319,18 @@ class PgmeMain(object):
 
 	def draw(self):
 		self.screen.fill((0,0,0))
-				
+		
+		self.draw_graphs()		
 		self.draw_board()
 	
-		self.draw_graphs()
+		
 
 		
 		pygame.display.flip()
+
+
+
+
 
 	def draw_board(self):
 		#draw the primary and secondary view
@@ -260,6 +349,66 @@ class PgmeMain(object):
 		rect = rect.move(10,self.height-40)
 		self.screen.blit(self.controls,rect)
 
+		if self.save_load == 2:
+			self.load_files()
+
+		#messages to user
+		if self.save_load == 1:
+			rect = self.save_msg.get_rect()
+			rect = rect.move(10,self.height-120)
+			self.screen.blit(self.save_msg,rect)
+			
+			
+			if time.time() - self.timer > 2:
+				self.save_load = 0
+		
+
+	def load_files(self):
+		#load file window
+		rect_load = (self.width/3,self.height/3,self.width/3,self.height/3)
+		pygame.draw.rect(self.screen,(0,0,0),rect_load)		
+		pygame.draw.rect(self.screen,AQUA,rect_load,4)	
+
+		loadmsg = self.control_font.render("select a file",True, AQUA)
+		rect = loadmsg.get_rect()
+		rect = rect.move(self.width/3+10, self.height/3 + 10)
+		self.screen.blit(loadmsg,rect)
+		page = len(self.load_list)
+
+		if self.pg_num > page:
+			self.pg_num = 0
+		move_pos = 40		
+		for i in self.load_list[self.pg_num+0:self.pg_num+9]:
+				 # list the files under each other
+				files = self.control_font.render(i,True, CHALK)
+				rect = files.get_rect()
+				rect = rect.move(self.width/3+10,self.height/3+move_pos)
+				self.screen.blit(files,rect)
+				move_pos += 20
+
+		move_pos = 40	
+		for i in self.load_list[self.pg_num+10:self.pg_num+19]:
+				 # list the files under each other
+				files = self.control_font.render(i,True, CHALK)
+				rect = files.get_rect()
+				rect = rect.move(self.width/2+10,self.height/3+move_pos)
+				self.screen.blit(files,rect)
+				move_pos += 20
+
+		if page // 20 > 0:
+			self.next_pg_button()
+
+		#if there are more than 20 files to diplay, do next screen
+
+	def next_pg_button(self):
+		x = self.width/3
+		y = self.height/3
+
+		pygame.draw.circle(self.screen,PEA,(int(2*x),int(2*y)),10)
+		pygame.draw.polygon(self.screen,(0,0,0),\
+								((2*x-6,2*y-5),(2*x+6,2*y-5),(2*x,2*y+6)))
+	
+	
 	def draw_graphs(self):
 		pos = pygame.mouse.get_pos()
 
@@ -271,6 +420,63 @@ class PgmeMain(object):
 		elif self.selected_index is None:
 			selected_vertex = None
 		
+		
+
+		# Draw the edges of adjacent vertecies:
+		# Draw a line from the i,jth vertex in the a_list 
+		# to each of the vertexes listed in the corresponding
+		# ith vertex in the v_list
+		
+		# when one vertex is being moved, make sure not to draw the edges
+		# until it reaches its final destination
+		if self.move_vertex:
+			index_counter = 0
+			for i in self.a_list1:
+			
+				for j in i:
+					if j is not selected_vertex and self.v_list1[index_counter]\
+																	 is not selected_vertex:
+
+							pygame.draw.line(self.screen,LAV,self.v_list1[\
+														index_counter].xy,j.xy, 2)
+					else:
+						for j in self.a_list1[self.selected_index]:
+							pygame.draw.line(self.screen,LAV,pos,j.xy, 2)
+				index_counter += 1
+			
+
+			index_counter = 0	
+			for i in self.a_list2:
+			
+				for j in i:
+					if j is not selected_vertex and self.v_list2[index_counter]\
+																	 is not selected_vertex:
+					
+							pygame.draw.line(self.screen,LAV,self.v_list2[\
+														index_counter].xy,j.xy, 2)
+					else:
+						for j in self.a_list2[self.selected_index]:
+							pygame.draw.line(self.screen,LAV,pos,j.xy, 2)
+				index_counter += 1
+	
+		else:
+			index_counter = 0
+			for i in self.a_list1:
+				for j in i:
+					pygame.draw.line(self.screen,LAV,self.v_list1[\
+												index_counter].xy,j.xy, 2)
+
+				index_counter += 1
+
+			index_counter = 0
+			for i in self.a_list2:
+				for j in i:
+					pygame.draw.line(self.screen,LAV,self.v_list2[\
+												index_counter].xy,j.xy, 2)
+
+				index_counter += 1
+		
+
 		#draw the vertices,
 		# if one in the list is the selected vertex, draw it a different colour,
 		# or draw it moving with the cursor.
@@ -296,52 +502,6 @@ class PgmeMain(object):
 					##
 					pygame.draw.line(self.screen,CORAL,i.xy,pos,2)	
 
-
-		# Draw the edges of adjacent vertecies:
-		# Draw a line from the i,jth vertex in the a_list 
-		# to each of the vertexes listed in the corresponding ith vertex in the v_list
-		
-		if self.move_vertex:
-			index_counter = 0
-			for i in self.a_list1:
-			
-				for j in i:
-					if j is not selected_vertex and self.v_list1[index_counter] is not selected_vertex:
-					
-							pygame.draw.line(self.screen,LAV,self.v_list1[index_counter].xy,j.xy, 2)
-					else:
-						for j in self.a_list1[self.selected_index]:
-							pygame.draw.line(self.screen,LAV,pos,j.xy, 2)
-				index_counter += 1
-			
-
-			index_counter = 0	
-			for i in self.a_list2:
-			
-				for j in i:
-					if j is not selected_vertex and self.v_list2[index_counter] is not selected_vertex:
-					
-							pygame.draw.line(self.screen,LAV,self.v_list2[index_counter].xy,j.xy, 2)
-					else:
-						for j in self.a_list2[self.selected_index]:
-							pygame.draw.line(self.screen,LAV,pos,j.xy, 2)
-				index_counter += 1
-	
-
-		else:
-			index_counter = 0
-			for i in self.a_list1:
-				for j in i:
-					pygame.draw.line(self.screen,LAV,self.v_list1[index_counter].xy,j.xy, 2)
-
-				index_counter += 1
-
-			index_counter = 0
-			for i in self.a_list2:
-				for j in i:
-					pygame.draw.line(self.screen,LAV,self.v_list2[index_counter].xy,j.xy, 2)
-
-				index_counter += 1
 
 
 PgmeMain()
