@@ -60,18 +60,16 @@ class PgmeMain(object):
 		self.current_graph = 1 #(1 for g1 or 2 for g2)
 		self.gwidth = [0,self.width/2]
 		
-	
 		#vertex and edge variables 
 		#vertex list 
-		self.v_list1 = [Vertex((10,10)),Vertex((100,300)),Vertex((90,20))]
+		self.v_list1 = []
 		self.v_list2 = []
 		 
 		#adjacency list. 
 		# First list index corresponds to the vertex at the 
 		# same index in the vertex list	
 
-		self.a_list1 = [[self.v_list1[1],self.v_list1[2]], \
-			[self.v_list1[0],self.v_list1[2]],[self.v_list1[0],self.v_list1[1]]]
+		self.a_list1 = []
 		self.a_list2 = []
 		
 		
@@ -142,8 +140,9 @@ class PgmeMain(object):
 							if ((i.xy[0] - 10) < pos[0] < (i.xy[0] + 10)) and \
 								((i.xy[1] - 10) < pos[1] < (i.xy[1] + 10)):
 								add = False
-								self.selected_index = self.v_list1.index(i)
 								self.move_vertex = True
+								self.selected_index = self.v_list1.index(i)
+								
 
 						if add:
 							self.v_list1.append(Vertex(pos))
@@ -155,8 +154,9 @@ class PgmeMain(object):
 							if ((i.xy[0] - 10) < pos[0] < (i.xy[0] + 10)) and \
 								((i.xy[1] - 10) < pos[1] < (i.xy[1] + 10)):
 								add = False
-								self.selected_index = self.v_list2.index(i)
 								self.move_vertex = True
+								self.selected_index = self.v_list2.index(i)
+								
 
 
 				elif pressed == (1,0,0) and self.save_load == 2:
@@ -241,7 +241,10 @@ class PgmeMain(object):
 								self.morph = False 
 							else:
 								self.selected_index = None
-
+								self.move_vertex = None
+				else:
+					self.selected_index = None
+					self.move_vertex = None
 
 			elif event.type == pygame.KEYDOWN and event.key == pygame.K_d:
 				
@@ -412,35 +415,6 @@ class PgmeMain(object):
 		self.save_load = 3
 
 	
-
-
-
-	def draw_board(self):
-		#draw the primary and secondary view
-		rect_g1 = (0,0,self.width/2-2,self.height-50)
-		rect_g2 = (self.width/2,0,self.width/2-2,self.height-50)
-		
-		if self.current_graph == 1:
-			pygame.draw.rect(self.screen,SUN,rect_g1,4)
-			pygame.draw.rect(self.screen,GOOSE,rect_g2,4)
-		elif self.current_graph == 2:
-			pygame.draw.rect(self.screen,GOOSE,rect_g1,4)
-			pygame.draw.rect(self.screen,SUN,rect_g2,4)
-
-		# draw controls
-		rect = self.controls.get_rect()
-		rect = rect.move(10,self.height-40)
-		self.screen.blit(self.controls,rect)
-	
-		if self.save_load == 1:
-			self.save_load_msg(self.save_msg)
-		
-		if self.save_load == 2:
-			self.load_files()
-			
-		if self.save_load == 3:
-			self.save_load_msg(self.load_msg)
-
 	def save_load_msg(self,msg):
 		#messages to user
 			
@@ -487,7 +461,6 @@ class PgmeMain(object):
 			self.next_pg_button()
 
 		#if there are more than 20 files to diplay, do next screen
-
 	def next_pg_button(self):
 		x = self.width/3
 		y = self.height/3
@@ -495,7 +468,32 @@ class PgmeMain(object):
 		pygame.draw.circle(self.screen,PEA,(int(2*x),int(2*y)),10)
 		pygame.draw.polygon(self.screen,(0,0,0),\
 								((2*x-6,2*y-5),(2*x+6,2*y-5),(2*x,2*y+6)))
+	def draw_board(self):
+		#draw the primary and secondary view
+		rect_g1 = (0,0,self.width/2-2,self.height-50)
+		rect_g2 = (self.width/2,0,self.width/2-2,self.height-50)
+		
+		if self.current_graph == 1:
+			pygame.draw.rect(self.screen,SUN,rect_g1,4)
+			pygame.draw.rect(self.screen,GOOSE,rect_g2,4)
+		elif self.current_graph == 2:
+			pygame.draw.rect(self.screen,GOOSE,rect_g1,4)
+			pygame.draw.rect(self.screen,SUN,rect_g2,4)
+
+		# draw controls
+		rect = self.controls.get_rect()
+		rect = rect.move(10,self.height-40)
+		self.screen.blit(self.controls,rect)
 	
+		if self.save_load == 1:
+			self.save_load_msg(self.save_msg)
+		
+		if self.save_load == 2:
+			self.load_files()
+			
+		if self.save_load == 3:
+			self.save_load_msg(self.load_msg)
+
 	
 	def draw_graphs(self):
 		pos = pygame.mouse.get_pos()
@@ -574,10 +572,13 @@ class PgmeMain(object):
 			else:
 				if pygame.mouse.get_pressed() ==(1,0,0) and self.move_vertex:
 					pygame.draw.circle(self.screen,PEA,pos,8)
+					print "move"
 				else:
 					pygame.draw.circle(self.screen,PEA,i.xy,8)
 					##
 					pygame.draw.line(self.screen,CORAL,i.xy,pos,2)
+					print "connect"
+					
 		for i in self.v_list2:
 			if i is not selected_vertex:
 				pygame.draw.circle(self.screen,AQUA,i.xy,8)
@@ -587,9 +588,7 @@ class PgmeMain(object):
 					pygame.draw.circle(self.screen,PEA,pos,8)
 				else:
 					pygame.draw.circle(self.screen,PEA,i.xy,8)
-					##
-					pygame.draw.line(self.screen,CORAL,i.xy,pos,2)	
-					
+
 
 
 	def draw(self):
@@ -598,9 +597,7 @@ class PgmeMain(object):
 		self.draw_graphs()		
 		self.draw_board()
 	
-		
-
-		
+				
 		pygame.display.flip()
 
 
