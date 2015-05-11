@@ -3,7 +3,7 @@ import sys
 import math 
 import pygame
 import time
-
+import glob
 
 # colour globals
 LAV = (100,100,200)
@@ -52,8 +52,8 @@ class PgmeMain(object):
 		
 		# save load varables
 		# displaying messages
-		self.save_load = 2 # 0 for neither; 1 to save, 2 for load
-		self.load_list = ["asdsd","asdjsjak","ajsdkasjkl","asdjkjkl","2015_5_8_132137.txt","2015_5_8_132137.txt","238912390","2015_5_8_132137.txt","2015_5_8_132137.txt","2015_5_8_132137.txt","2015_5_8_132137.txt","2015_5_8_132137.txt","2015_5_8_132137.txt","2015_5_8_132137.txt","2015_5_8_132137.txt","sad","sdad","dsjfhs","akdsa","askjd"]
+		self.save_load = 0 # 0 for neither; 1 to save, 2 for load
+		self.load_list = []
 		self.timer = 0
 		self.pg_num = 0
 		# current graph variables (g1 or g2)
@@ -160,22 +160,43 @@ class PgmeMain(object):
 
 
 				elif pressed == (1,0,0) and self.save_load == 2:
-					#click the down button
-					if 2*self.width/3 -8 < pos[0] < \
-							2*self.width/3 + 8 and 2*self.height/3 - 8 <\
-							pos[1] < 2*self.height/3 + 8:
-						self.pg_num += 1
-	
-					#click on the desired file
-					if self.width/3 < pos[0] < self.width/2 \
-							and self.height/3 < pos[1] < 2*self.height/3:
-						print self.load_list[int(self.pg_num+\
-								(pos[1]-40-self.height/3)//20)]
 					
-					if self.width/2 < pos[0] < 2*self.width/3	\
-							and self.height/3 < pos[1] < 2*self.height/3:
-						print self.load_list[10+int(self.pg_num+\
-								(pos[1]-40-self.height/3)//20)]
+					select_file = None
+					
+					while select_file == None:
+						#if there are more than 20 entries, click the down button
+						if len(self.load_list) // 20 > 0:
+					
+					
+							if 2*self.width/3 -8 < pos[0] < \
+									2*self.width/3 + 8 and 2*self.height/3 - 8 <\
+									pos[1] < 2*self.height/3 + 8:
+								self.pg_num += 1
+	
+						#click on the desired file
+						if self.width/3 < pos[0] < self.width/2 \
+								and self.height/3 < pos[1] < 2*self.height/3:
+						
+							if int(self.pg_num+(pos[1]-40-self.height/3)//20) < len(self.load_list):
+								#######
+								print self.load_list[int(self.pg_num+\
+										(pos[1]-40-self.height/3)//20)]
+								select_file = self.load_list[int(self.pg_num+\
+										(pos[1]-40-self.height/3)//20)]
+								self.load_data(select_file)
+								
+						if self.width/2 < pos[0] < 2*self.width/3	\
+								and self.height/3 < pos[1] < 2*self.height/3:
+						
+							if 10+int(self.pg_num+(pos[1]-40-self.height/3)//20) < len(self.load_list):
+									#######
+								print self.load_list[10+int(self.pg_num+\
+										(pos[1]-40-self.height/3)//20)]
+								select_file = self.load_list[10+int(self.pg_num+\
+										(pos[1]-40-self.height/3)//20)]
+								self.load_data(select_file)
+									
+									
 			elif event.type == pygame.MOUSEBUTTONUP:
 
 				#when a moved vertex is "dropped", 
@@ -291,7 +312,7 @@ class PgmeMain(object):
 				
 				filename = str(tm.tm_year) + "_" + str(tm.tm_mon) + "_" + \
 									str(tm.tm_mday) + "_" + str(tm.tm_hour) + \
-									str(tm.tm_min) + str(tm.tm_sec)
+									str(tm.tm_min) + str(tm.tm_sec)+".graph"
 
 				f = open(filename,"w")
  				f.write(str(self.count_v_and_e()) + "\n")
@@ -303,9 +324,12 @@ class PgmeMain(object):
 				self.save_load = 1
 
 			elif event.type == pygame.KEYDOWN and event.key == pygame.K_l:
-				pass #glob to read files into self.load_list
+				#glob to read files into self.load_list
 						#determine number of files, can display 20 per page
-						
+					self.save_load = 2
+					self.load_list = glob.glob("*.graph")
+					
+					
 			elif event.type == pygame.KEYDOWN and event.key == pygame.K_m:
 				if self.morph:
 					pass 
@@ -316,19 +340,78 @@ class PgmeMain(object):
 			else:
 				pass
 	
-
-	def draw(self):
-		self.screen.fill((0,0,0))
-		
-		self.draw_graphs()		
-		self.draw_board()
 	
+	
+	
+
+	def load_data(self,select_file):
+		f=open(select_file,"r")
+		f1=f.readline()
+		self.v_list1 = []
+		self.a_list1 = []
+		self.v_list2 = []
+		self.a_list2 = []
+	
+		#parse the lines and generate v and a lists
+		f2 = f.readline() # self.v_list1
+		if f2 != '[]\n':
+			f2 = f2.rstrip(')]\n')
+			f2 = f2.lstrip('[(')
+			f2 = f2.split('), (')
+			for i in f2:
+				j = i.split(', ')
+				
+				self.v_list1.append(Vertex((int(j[0]),int(j[1]))))
 		
-
 		
-		pygame.display.flip()
+		f3 = f.readline() #self.a_list1
+		if f3 != '[]\n':
+			f3 = f3.rstrip(')]]\n')
+			f3 = f3.lstrip('[[(')
+			f3 = f3.split('], [')
+			for i in f3:
+				temp_list = []
+				l = i.rstrip(')')
+				l = l.lstrip('(')
+				l = l.split('), (')
+				for j in l:
+					k = j.split(', ')
+					temp_list.append(Vertex((int(k[0]),int(k[1]))))
+				self.a_list1.append(temp_list)
+				
+	
+		f4 = f.readline() #self.v_list2
+		if f4 != '[]\n':
+			f4 = f4.rstrip(')]\n')
+			f4 = f4.lstrip('[(')
+			f4 = f4.split('), (')
+	
+			for i in f4:
+				j = i.split(', ')
+			
+				self.v_list2.append(Vertex((int(j[0]),int(j[1]))))
+	
+		f5 = f.readline() #self.a_list2
+		if f5 != '[]\n':
+			f5 = f5.rstrip(')]]\n')
+			f5 = f5.lstrip('[[(')
+			f5 = f5.split('], [')
+	
+			for i in f5:
+				temp_list = []
+				l = i.rstrip(')')
+				l = l.lstrip('(')
+				l = l.split('), (')
+				for j in l:
+					k = j.split(', ')
+					temp_list.append(Vertex((int(k[0]),int(k[1]))))
+				self.a_list2.append(temp_list)
+		
+		
+		self.timer = time.time()
+		self.save_load = 3
 
-
+	
 
 
 
@@ -348,19 +431,24 @@ class PgmeMain(object):
 		rect = self.controls.get_rect()
 		rect = rect.move(10,self.height-40)
 		self.screen.blit(self.controls,rect)
-
+	
+		if self.save_load == 1:
+			self.save_load_msg(self.save_msg)
+		
 		if self.save_load == 2:
 			self.load_files()
+			
+		if self.save_load == 3:
+			self.save_load_msg(self.load_msg)
 
+	def save_load_msg(self,msg):
 		#messages to user
-		if self.save_load == 1:
-			rect = self.save_msg.get_rect()
-			rect = rect.move(10,self.height-120)
-			self.screen.blit(self.save_msg,rect)
 			
-			
-			if time.time() - self.timer > 2:
-				self.save_load = 0
+		rect = self.save_msg.get_rect()
+		rect = rect.move(10,self.height-120)
+		self.screen.blit(msg,rect)
+		if time.time() - self.timer > 2:
+			self.save_load = 0
 		
 
 	def load_files(self):
@@ -501,6 +589,21 @@ class PgmeMain(object):
 					pygame.draw.circle(self.screen,PEA,i.xy,8)
 					##
 					pygame.draw.line(self.screen,CORAL,i.xy,pos,2)	
+					
+
+
+	def draw(self):
+		self.screen.fill((0,0,0))
+		
+		self.draw_graphs()		
+		self.draw_board()
+	
+		
+
+		
+		pygame.display.flip()
+
+
 
 
 
