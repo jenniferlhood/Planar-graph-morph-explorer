@@ -39,14 +39,11 @@ class PgmeMain(object):
 		#font
 		fontfile = pygame.font.match_font('helvetica')
 		self.control_font = pygame.font.Font(fontfile,20)
-		self.msg_font = pygame.font.Font(fontfile,60)
-		msg1 = "mouse left : add/move vertex  |  mouse right : connect vertex    "
-		msg2 = "|    s : switch graph  |  c : clone current  |  d : delete   "
-		msg3 =	"|    f : save to file |  l: load from file   |    m : morph "
+		self.msg_font = pygame.font.Font(fontfile,40)
+		
 		msg4 = "saved"
 		msg5 = "loaded"
-
-		self.controls = self.control_font.render(msg1+msg2+msg3,True, CHALK)
+		
 		self.save_msg = self.msg_font.render(msg4,True,CHALK)
 		self.load_msg = self.msg_font.render(msg5,True,CHALK)
 		
@@ -335,8 +332,9 @@ class PgmeMain(object):
 					
 			elif event.type == pygame.KEYDOWN and event.key == pygame.K_m:
 				if self.morph:
-					pass 
-					#do the morph
+					print "graphs are similar."
+				else:
+					print "graphs are not similar, please clone and add no more vertices"
 							
 			elif event.type == self.REFRESH:
 				self.draw()
@@ -461,6 +459,7 @@ class PgmeMain(object):
 			self.next_pg_button()
 
 		#if there are more than 20 files to diplay, do next screen
+	
 	def next_pg_button(self):
 		x = self.width/3
 		y = self.height/3
@@ -468,6 +467,7 @@ class PgmeMain(object):
 		pygame.draw.circle(self.screen,PEA,(int(2*x),int(2*y)),10)
 		pygame.draw.polygon(self.screen,(0,0,0),\
 								((2*x-6,2*y-5),(2*x+6,2*y-5),(2*x,2*y+6)))
+	
 	def draw_board(self):
 		#draw the primary and secondary view
 		rect_g1 = (0,0,self.width/2-2,self.height-50)
@@ -480,10 +480,29 @@ class PgmeMain(object):
 			pygame.draw.rect(self.screen,GOOSE,rect_g1,4)
 			pygame.draw.rect(self.screen,SUN,rect_g2,4)
 
+
+		#graw title/description for g1 and g2
+		
+		title = self.msg_font.render("G1", True, CHALK)
+		rect = title.get_rect()
+		rect = rect.move(10, 10)
+		self.screen.blit(title, rect)
+		
+		title2 = self.msg_font.render("G2", True, CHALK)
+		rect = title.get_rect()
+		rect = rect.move((self.width/2)+10, 10)
+		self.screen.blit(title2, rect)
+
+
 		# draw controls
-		rect = self.controls.get_rect()
+		msg1 = "mouse left : add/move vertex  |  mouse right : connect vertex    "
+		msg2 = "|    s : switch graph  |  c : clone current  |  d : delete   "
+		msg3 =	"|    f : save to file |  l: load from file   |    m : morph "
+		
+		controls = self.control_font.render(msg1+msg2+msg3,True, CHALK)
+		rect = controls.get_rect()
 		rect = rect.move(10,self.height-40)
-		self.screen.blit(self.controls,rect)
+		self.screen.blit(controls,rect)
 	
 		if self.save_load == 1:
 			self.save_load_msg(self.save_msg)
@@ -572,12 +591,9 @@ class PgmeMain(object):
 			else:
 				if pygame.mouse.get_pressed() ==(1,0,0) and self.move_vertex:
 					pygame.draw.circle(self.screen,PEA,pos,8)
-					print "move"
 				else:
 					pygame.draw.circle(self.screen,PEA,i.xy,8)
-					##
 					pygame.draw.line(self.screen,CORAL,i.xy,pos,2)
-					print "connect"
 					
 		for i in self.v_list2:
 			if i is not selected_vertex:
