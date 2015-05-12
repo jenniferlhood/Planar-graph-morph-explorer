@@ -21,6 +21,7 @@ class Vertex(object):
 	def __init__(self,(x,y)):
 		self.xy = (x,y)
 
+	
 class PgmeMain(object):
 	def __init__(self):
 
@@ -107,6 +108,17 @@ class PgmeMain(object):
 	def v_list_coordinates(self,v_list):
 		return [i.xy for i in v_list]
 
+	#save the v_list indexes of connected vertices
+	def v_list_index(self, v_list, a_list):
+		a_list_ind = []
+		index = 0
+		for i in a_list:
+			a_list_ind.append([])
+			for j in i:
+				a_list_ind[index].append(v_list.index(j))
+			index += 1
+		return a_list_ind 
+ 
 	def a_list_coordinates(self,a_list):
 		a_cord = []
 		index = 0
@@ -139,21 +151,19 @@ class PgmeMain(object):
 		
 		
 		f3 = f.readline() #self.a_list1
+		index = 0
 		if f3 != '[]\n':
-			f3 = f3.rstrip(')]]\n')
-			f3 = f3.lstrip('[[(')
+			f3 = f3.rstrip(']]\n')
+			f3 = f3.lstrip('[[')
 			f3 = f3.split('], [')
 			for i in f3:
-				temp_list = []
-				l = i.rstrip(')')
-				l = l.lstrip('(')
-				l = l.split('), (')
+				self.a_list1.append([])
+				l = i.split(', ')
 				for j in l:
-					k = j.split(', ')
-					if k[0] is not '' and k[1] is not '':
-						temp_list.append(Vertex((int(k[0]),int(k[1]))))
-				self.a_list1.append(temp_list)
-				
+					if j is not '':
+						self.a_list1[index].append(self.v_list1[int(j)])
+				index += 1
+
 	
 		f4 = f.readline() #self.v_list2
 		if f4 != '[]\n':
@@ -167,25 +177,25 @@ class PgmeMain(object):
 					self.v_list2.append(Vertex((int(j[0]),int(j[1]))))
 	
 		f5 = f.readline() #self.a_list2
+		index = 0
 		if f5 != '[]\n':
-			f5 = f5.rstrip(')]]\n')
-			f5 = f5.lstrip('[[(')
+			f5 = f5.rstrip(']]\n')
+			f5 = f5.lstrip('[[')
 			f5 = f5.split('], [')
-	
 			for i in f5:
-				temp_list = []
-				l = i.rstrip(')')
-				l = l.lstrip('(')
-				l = l.split('), (')
+				self.a_list2.append([])
+				l = i.split(', ')
 				for j in l:
-					k = j.split(', ')
-					if k[0] is not '' and k[1] is not '':
-						temp_list.append(Vertex((int(k[0]),int(k[1]))))
-				self.a_list2.append(temp_list)
-		
+					if j is not '':
+						self.a_list2[index].append(self.v_list2[int(j)])
+
+				index += 1
 		
 		self.timer = time.time()
 		self.state = 3
+		
+		for i in self.a_list1:
+			print i
 
 
 	# Main Event handling method
@@ -411,11 +421,16 @@ class PgmeMain(object):
 				f = open(filename,"w")
  				f.write(str(self.count_v_and_e()) + "\n")
 				f.write(str(self.v_list_coordinates(self.v_list1)) + "\n")
-				f.write(str(self.a_list_coordinates(self.a_list1)) + "\n")
+				f.write(str(self.v_list_index(self.v_list1,self.a_list1)) + "\n")
+				#f.write(str(self.a_list_coordinates(self.a_list1)) + "\n")
 				f.write(str(self.v_list_coordinates(self.v_list2)) + "\n")
-				f.write(str(self.a_list_coordinates(self.a_list2)) + "\n")
+				f.write(str(self.v_list_index(self.v_list2,self.a_list2)) + "\n")
+				#f.write(str(self.a_list_coordinates(self.a_list2)) + "\n")
 				f.close()
 				self.state = 1
+
+				for i in self.a_list1:
+					print i
 
 			elif event.type == pygame.KEYDOWN and event.key == pygame.K_l:
 				#glob to read files into self.load_list
@@ -697,15 +712,14 @@ class PgmeMain(object):
 			
 			for j in self.a_list1[index]:
 				dx_j = int(j.xy[0] + self.width/4 \
-					+ self.v_list_vector[self.v_list1.index(j)][0]*(elapsed/total))
+						+ self.v_list_vector[self.v_list1.index(j)][0]\
+						*(elapsed/total))
 
-				dy_j = int(j.xy[1] + self.v_list_vector[self.v_list1.index(j)][1]*(elapsed/total))
+				dy_j = int(j.xy[1] + self.v_list_vector[\
+						self.v_list1.index(j)][1]*(elapsed/total))
 				
 				pygame.draw.line(self.screen,LAV,(dx,dy),(dx_j,dy_j), 2)
-
-
-
-			
+	
 			index += 1
 					
 
