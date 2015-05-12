@@ -191,6 +191,10 @@ class PgmeMain(object):
 
 				index += 1
 		
+		#force similarity
+		if f3 == f5:
+			self.morph_ok = True
+
 		self.timer = time.time()
 		self.state = 3
 		
