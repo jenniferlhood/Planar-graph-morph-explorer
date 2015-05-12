@@ -159,7 +159,7 @@ class PgmeMain(object):
 				elif pressed == (1,0,0) and self.save_load == 2:
 					
 					select_file = None
-					
+				
 					while select_file == None:
 						#if there are more than 20 entries, click the down button
 						if len(self.load_list) // 20 > 0:
@@ -169,31 +169,40 @@ class PgmeMain(object):
 									2*self.width/3 + 8 and 2*self.height/3 - 8 <\
 									pos[1] < 2*self.height/3 + 8:
 								self.pg_num += 1
-	
-						#click on the desired file
+						
+							
+					#click on the desired file
 						if self.width/3 < pos[0] < self.width/2 \
 								and self.height/3 < pos[1] < 2*self.height/3:
-						
-							if int(self.pg_num+(pos[1]-40-self.height/3)//20) < len(self.load_list):
+					
+							if int(self.pg_num+(pos[1]-40-self.height/3)//20)\
+															 < len(self.load_list):
 								#######
 								print self.load_list[int(self.pg_num+\
 										(pos[1]-40-self.height/3)//20)]
 								select_file = self.load_list[int(self.pg_num+\
 										(pos[1]-40-self.height/3)//20)]
 								self.load_data(select_file)
-								
-						if self.width/2 < pos[0] < 2*self.width/3	\
+							
+						elif self.width/2 < pos[0] < 2*self.width/3	\
 								and self.height/3 < pos[1] < 2*self.height/3:
-						
-							if 10+int(self.pg_num+(pos[1]-40-self.height/3)//20) < len(self.load_list):
+					
+							if 10+int(self.pg_num+(pos[1]-40-self.height/3)//20)\
+																 < len(self.load_list):
 									#######
 								print self.load_list[10+int(self.pg_num+\
 										(pos[1]-40-self.height/3)//20)]
 								select_file = self.load_list[10+int(self.pg_num+\
 										(pos[1]-40-self.height/3)//20)]
 								self.load_data(select_file)
-									
-									
+						else:
+							select_file = 0
+							self.save_load = 0	
+						#elif len(self.load_list) == 0:
+		
+
+
+
 			elif event.type == pygame.MOUSEBUTTONUP:
 
 				#when a moved vertex is "dropped", 
@@ -361,8 +370,8 @@ class PgmeMain(object):
 			f2 = f2.split('), (')
 			for i in f2:
 				j = i.split(', ')
-				
-				self.v_list1.append(Vertex((int(j[0]),int(j[1]))))
+				if j[0] is not '' and j[1] is not '':
+					self.v_list1.append(Vertex((int(j[0]),int(j[1]))))
 		
 		
 		f3 = f.readline() #self.a_list1
@@ -377,7 +386,8 @@ class PgmeMain(object):
 				l = l.split('), (')
 				for j in l:
 					k = j.split(', ')
-					temp_list.append(Vertex((int(k[0]),int(k[1]))))
+					if k[0] is not '' and k[1] is not '':
+						temp_list.append(Vertex((int(k[0]),int(k[1]))))
 				self.a_list1.append(temp_list)
 				
 	
@@ -389,8 +399,8 @@ class PgmeMain(object):
 	
 			for i in f4:
 				j = i.split(', ')
-			
-				self.v_list2.append(Vertex((int(j[0]),int(j[1]))))
+				if j[0] is not '' and j[1] is not '':
+					self.v_list2.append(Vertex((int(j[0]),int(j[1]))))
 	
 		f5 = f.readline() #self.a_list2
 		if f5 != '[]\n':
@@ -405,7 +415,8 @@ class PgmeMain(object):
 				l = l.split('), (')
 				for j in l:
 					k = j.split(', ')
-					temp_list.append(Vertex((int(k[0]),int(k[1]))))
+					if k[0] is not '' and k[1] is not '':
+						temp_list.append(Vertex((int(k[0]),int(k[1]))))
 				self.a_list2.append(temp_list)
 		
 		
