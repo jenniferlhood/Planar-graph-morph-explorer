@@ -247,8 +247,22 @@ class PgmeMain(object):
 								self.move_vertex = True
 								self.selected_index = self.v_list2.index(i)
 								
-
-
+	
+				elif event.button == 3 and (self.gwidth[0]+10) < pos[0] < \
+								(self.gwidth[1]-10) and 0 < pos[1] < self.height-20\
+								and self.state == 0:
+								
+					if self.selected_index is not None and self.current_graph == 1:
+						add = False
+						for i in self.v_list1:
+						
+							if ((i.xy[0] - 10) < pos[0] < (i.xy[0] + 10)) and \
+								((i.xy[1] - 10) < pos[1] < (i.xy[1] + 10)):				
+								add = True
+						if add == False:
+							self.selected_index = None
+							
+							
 				elif event.button == 1 and self.state == 2:
 					
 					select_file = None
@@ -423,9 +437,6 @@ class PgmeMain(object):
 				f.close()
 				self.state = 1
 
-				for i in self.a_list1:
-					print i
-
 			elif event.type == pygame.KEYDOWN and event.key == pygame.K_l:
 				#glob to read files into self.load_list
 						#determine number of files, can display 20 per page
@@ -478,8 +489,8 @@ class PgmeMain(object):
 			for i in range(len(self.v_list1)):
 			
 				temp_vector_list.append(\
-					(random.randrange(self.width/4,3*self.width/4),\
-					random.randrange(0,self.height)))
+					(random.randrange(self.width/4+10,3*self.width/4-10),\
+					random.randrange(10,self.height-60)))
 			#	temp_vector_list.append((self.width/4+50,50))
 
 			self.m_list.append(temp_vector_list)
@@ -493,29 +504,7 @@ class PgmeMain(object):
 		self.m_list.append(temp_vector_list)
 		temp_vector_list = []
 
-		print len(self.m_list)
 
-
-
-
-
-
-
-		#Calculate the xy speed vector
-	
-	#	for i in range(len(self.v_list1)):
-	#		dx = (self.v_list2[i].xy[0]-self.width/4)-\
-	#						(self.v_list1[i].xy[0]+self.width/4)
-	#		dy = self.v_list2[i].xy[1]-self.v_list1[i].xy[1]
-	#		temp_vector_list.append((dy,dy))			
-			
-
-	#	self.m_list.append(temp_vector_list)
-	
-	#
-	# Graphical and interface methods associated with self.draw()	
-	#
-	#
 	def state_msg(self,msg):
 		#messages to user regarding program state
 			
@@ -725,18 +714,17 @@ class PgmeMain(object):
 		#   or # of total lists in m_list -1)
 
 		k = len(self.m_list) - 1
+		
 		# determine which list in m_list is the 
 		# current position from which to calculate the animation 
+		
 		m = int((k*elap/total)//1)
+		
 		#number of frames for each intermediate animation
 		subtotal = (total/k)
 
-		""" cacl and draw animated graph """
+		""" calc and draw animated graph btween each intermediate step"""
 
-		#animate between the intermetidate steps
-		pygame.draw.circle(self.screen,CORAL,(int(self.width/4+50),50),8)
-		#print k, m, round(elap,1),subtotal, round(((elap%subtotal)/subtotal),2)
-		
 		if m != k:
 			for i in range(len(self.m_list[m])):
 				dx = int(self.m_list[m+1][i][0]*(elap%subtotal)/subtotal	+ \
@@ -760,34 +748,6 @@ class PgmeMain(object):
       	
 				pygame.draw.circle(self.screen,AQUA,(dx,dy),8)		
   
-
-
-
-
-
-
-
-		#for i in range(len(self.v_list1)):
-			#calculate this frame's xy depending on the speed vector
-			# and the elapsed time			
-		#	dx = int(self.v_list1.xy[0] + self.width/4 \
-		#			+ self.m_list[i][0]*(elapsed/total))
-						
-		#	dy = int(self.v_list1.xy[1] + self.m_list[i][1]*(elapsed/total))
-			
-		
-		#	pygame.draw.circle(self.screen,AQUA,(dx,dy),8)
-			
-		#	for j in self.a_list1[i]:
-		#		dx_j = int(j.xy[0] + self.width/4 \
-		#				+ self.m_list[self.v_list1.index(j)][0]\
-		#				*(elapsed/total))
-
-		#		dy_j = int(j.xy[1] + self.m_list[\
-		#				self.v_list1.index(j)][1]*(elapsed/total))
-				
-		#		pygame.draw.line(self.screen,LAV,(dx,dy),(dx_j,dy_j), 2)
-	
 
 
 		if time.time() - self.timer > self.morph_time:
