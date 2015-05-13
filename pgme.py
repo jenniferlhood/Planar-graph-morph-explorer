@@ -4,6 +4,7 @@ import math
 import pygame
 import time
 import glob
+import random
 
 # colour globals
 LAV = (100,100,200)
@@ -84,9 +85,9 @@ class PgmeMain(object):
 		#morph varbales
 		self.morph_ok = False #check for conditions for morph
 		self.morph = False #morph mode switch	
-		self.morph_time = 3 #time it takes to animate the morph
+		self.morph_time = 5 #time it takes to animate the morph
 
-		self.v_list_vector = [] #a list of caculated morph speed from g1 to g2)
+		self.m_list = [] #a list of caculated morph speed from g1 to g2)
 
 		#after variable initialization, run the main program loop
 		self.event_loop()
@@ -192,9 +193,7 @@ class PgmeMain(object):
 
 		self.timer = time.time()
 		self.state = 3
-		
-		for i in self.a_list1:
-			print i
+
 
 
 	# Main Event handling method
@@ -206,12 +205,14 @@ class PgmeMain(object):
 
 			event = pygame.event.wait()
 
-		
+
+
 			if event.type == pygame.QUIT:
 				sys.exit()
 
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				pos = event.pos
+
 				#for a left click, 
 				# add a vertex at the clicked coordinate (in the primary window)
 				# (and only when the loadfile screen isn't displayed)				
@@ -270,8 +271,8 @@ class PgmeMain(object):
 							if int(self.pg_num+(pos[1]-40-self.height/3)//20)\
 															 < len(self.load_list):
 								#######
-								print self.load_list[int(self.pg_num+\
-										(pos[1]-40-self.height/3)//20)]
+								#print self.load_list[int(self.pg_num+\
+								#		(pos[1]-40-self.height/3)//20)]
 								select_file = self.load_list[int(self.pg_num+\
 										(pos[1]-40-self.height/3)//20)]
 								self.load_data(select_file)
@@ -282,8 +283,8 @@ class PgmeMain(object):
 							if 10+int(self.pg_num+(pos[1]-40-self.height/3)//20)\
 																 < len(self.load_list):
 									#######
-								print self.load_list[10+int(self.pg_num+\
-										(pos[1]-40-self.height/3)//20)]
+								#print self.load_list[10+int(self.pg_num+\
+								#		(pos[1]-40-self.height/3)//20)]
 								select_file = self.load_list[10+int(self.pg_num+\
 										(pos[1]-40-self.height/3)//20)]
 								self.load_data(select_file)
@@ -292,7 +293,7 @@ class PgmeMain(object):
 							self.state = 0	
 						#elif len(self.load_list) == 0:
 		
-
+			
 
 
 			elif event.type == pygame.MOUSEBUTTONUP:
@@ -379,6 +380,7 @@ class PgmeMain(object):
 						self.v_list2.append(Vertex(g2v))
 						self.a_list2.append([])
 
+				
 					for i in range(len(self.v_list2)):					
 						for j in self.a_list1[i]:
 							self.a_list2[i].append(\
@@ -397,6 +399,7 @@ class PgmeMain(object):
 						self.v_list1.append(Vertex(g2v))
 						self.a_list1.append([])
 
+					
 					for i in range(len(self.v_list1)):					
 						for j in self.a_list2[i]:
 							self.a_list1[i].append(\
@@ -414,10 +417,9 @@ class PgmeMain(object):
  				f.write(str(self.count_v_and_e()) + "\n")
 				f.write(str(self.v_list_coordinates(self.v_list1)) + "\n")
 				f.write(str(self.v_list_index(self.v_list1,self.a_list1)) + "\n")
-				#f.write(str(self.a_list_coordinates(self.a_list1)) + "\n")
 				f.write(str(self.v_list_coordinates(self.v_list2)) + "\n")
 				f.write(str(self.v_list_index(self.v_list2,self.a_list2)) + "\n")
-				#f.write(str(self.a_list_coordinates(self.a_list2)) + "\n")
+
 				f.close()
 				self.state = 1
 
@@ -457,19 +459,58 @@ class PgmeMain(object):
 	
 	
 	def calc_morph(self):
-		self.v_list_vector = []
+		
+		k= 1 # one intermediate step
+
+		self.m_list = []
+		temp_vector_list = []
+	
+
+		# add the first set of coordinates from G1 (v_list1)
+		for i in self.v_list1:
+			temp_vector_list.append((i.xy[0]+self.width/4,i.xy[1]))		
+
+		self.m_list.append(temp_vector_list)
+		temp_vector_list = []
+
+		# gerate a randomized intermediate position
+		for i in range(k):
+			for i in range(len(self.v_list1)):
+			
+				temp_vector_list.append(\
+					(random.randrange(self.width/4,3*self.width/4),\
+					random.randrange(0,self.height)))
+			#	temp_vector_list.append((self.width/4+50,50))
+
+			self.m_list.append(temp_vector_list)
+			temp_vector_list = []
+
+
+	# add the final set of coordinates from G2 v_list2
+		for i in self.v_list2:
+			temp_vector_list.append((i.xy[0]-self.width/4,i.xy[1]))		
+
+		self.m_list.append(temp_vector_list)
+		temp_vector_list = []
+
+		print len(self.m_list)
+
+
+
+
+
+
 
 		#Calculate the xy speed vector
-
-		for i in range(len(self.v_list1)):
-		
-			dx = (self.v_list2[i].xy[0]-self.width/4)-\
-							(self.v_list1[i].xy[0]+self.width/4)
-			dy = self.v_list2[i].xy[1]-self.v_list1[i].xy[1]
-
-			self.v_list_vector.append((dx,dy))
+	
+	#	for i in range(len(self.v_list1)):
+	#		dx = (self.v_list2[i].xy[0]-self.width/4)-\
+	#						(self.v_list1[i].xy[0]+self.width/4)
+	#		dy = self.v_list2[i].xy[1]-self.v_list1[i].xy[1]
+	#		temp_vector_list.append((dy,dy))			
 			
 
+	#	self.m_list.append(temp_vector_list)
 	
 	#
 	# Graphical and interface methods associated with self.draw()	
@@ -676,30 +717,76 @@ class PgmeMain(object):
 		pygame.draw.rect(self.screen,(0,0,0),rect)
 		pygame.draw.rect(self.screen,SUN,rect,4)
 
-		elapsed = (time.time() - self.timer) * self.FPS
-		total = self.morph_time * self.FPS
+		elap = (time.time() - self.timer) * self.FPS # elapsed number of frames
+		total = self.morph_time * self.FPS # total frames needed for the animation
+	
+		# calculate the number of intermediate morphing steps
+		#   (which is # intermediate lists in m_list +1,
+		#   or # of total lists in m_list -1)
 
-		# draw the animated graph
-		for i in range(len(self.v_list1)):
+		k = len(self.m_list) - 1
+		# determine which list in m_list is the 
+		# current position from which to calculate the animation 
+		m = int((k*elap/total)//1)
+		#number of frames for each intermediate animation
+		subtotal = (total/k)
+
+		""" cacl and draw animated graph """
+
+		#animate between the intermetidate steps
+		pygame.draw.circle(self.screen,CORAL,(int(self.width/4+50),50),8)
+		#print k, m, round(elap,1),subtotal, round(((elap%subtotal)/subtotal),2)
+		
+		if m != k:
+			for i in range(len(self.m_list[m])):
+				dx = int(self.m_list[m+1][i][0]*(elap%subtotal)/subtotal	+ \
+					self.m_list[m][i][0]*(1-(elap%subtotal)/subtotal))
+				dy = int(self.m_list[m+1][i][1]*(elap%subtotal)/subtotal	+ \
+					self.m_list[m][i][1]*(1-(elap%subtotal)/subtotal))
+
+				for j in self.a_list1[i]:
+					dx_j = int(\
+							(self.m_list[m+1][self.v_list1.index(j)][0] * \
+							(elap%subtotal)/subtotal) + \
+							(self.m_list[m][self.v_list1.index(j)][0] *\
+							(1-(elap%subtotal)/subtotal)))
+					dy_j = int(\
+							(self.m_list[m+1][self.v_list1.index(j)][1] *\
+							(elap%subtotal)/subtotal) +\
+							(self.m_list[m][self.v_list1.index(j)][1] * \
+							(1-(elap%subtotal)/subtotal)))
+							
+	      				pygame.draw.line(self.screen,LAV,(dx,dy),(dx_j,dy_j), 2)
+      	
+				pygame.draw.circle(self.screen,AQUA,(dx,dy),8)		
+  
+
+
+
+
+
+
+
+		#for i in range(len(self.v_list1)):
 			#calculate this frame's xy depending on the speed vector
 			# and the elapsed time			
-			dx = int(self.v_list1.xy[0] + self.width/4 \
-					+ self.v_list_vector[i][0]*(elapsed/total))
-					
-			dy = int(self.v_list1.xy[1] + self.v_list_vector[i][1]*(elapsed/total))
+		#	dx = int(self.v_list1.xy[0] + self.width/4 \
+		#			+ self.m_list[i][0]*(elapsed/total))
+						
+		#	dy = int(self.v_list1.xy[1] + self.m_list[i][1]*(elapsed/total))
 			
+		
+		#	pygame.draw.circle(self.screen,AQUA,(dx,dy),8)
 			
-			pygame.draw.circle(self.screen,AQUA,(dx,dy),8)
-			
-			for j in self.a_list1[i]:
-				dx_j = int(j.xy[0] + self.width/4 \
-						+ self.v_list_vector[self.v_list1.index(j)][0]\
-						*(elapsed/total))
+		#	for j in self.a_list1[i]:
+		#		dx_j = int(j.xy[0] + self.width/4 \
+		#				+ self.m_list[self.v_list1.index(j)][0]\
+		#				*(elapsed/total))
 
-				dy_j = int(j.xy[1] + self.v_list_vector[\
-						self.v_list1.index(j)][1]*(elapsed/total))
+		#		dy_j = int(j.xy[1] + self.m_list[\
+		#				self.v_list1.index(j)][1]*(elapsed/total))
 				
-				pygame.draw.line(self.screen,LAV,(dx,dy),(dx_j,dy_j), 2)
+		#		pygame.draw.line(self.screen,LAV,(dx,dy),(dx_j,dy_j), 2)
 	
 
 
