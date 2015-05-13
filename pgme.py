@@ -53,7 +53,7 @@ class PgmeMain(object):
 		# 3 for load msg, 4 for morph mode
 		self.state = 0 
 		self.timer = 0
-
+		
 		# save load varables
 		# displaying messages
 		self.load_list = []
@@ -77,6 +77,7 @@ class PgmeMain(object):
 		
 		
 		# selected vertices 
+
 		self.selected_index = None
 		self.move_vertex = False
 
@@ -111,22 +112,19 @@ class PgmeMain(object):
 	#save the v_list indexes of connected vertices
 	def v_list_index(self, v_list, a_list):
 		a_list_ind = []
-		index = 0
-		for i in a_list:
+		
+		for i in range(len(a_list)):
 			a_list_ind.append([])
-			for j in i:
-				a_list_ind[index].append(v_list.index(j))
-			index += 1
+			for j in a_list[i]:
+				a_list_ind[i].append(v_list.index(j))
 		return a_list_ind 
  
 	def a_list_coordinates(self,a_list):
 		a_cord = []
-		index = 0
-		for i in a_list:
+		for i in range(len(a_list)):
 			a_cord.append([])
-			for j in i:
-				a_cord[index].append(j.xy)
-			index += 1
+			for j in a_list(i):
+				a_cord[i].append(j.xy)
 		return a_cord
 
 
@@ -151,19 +149,16 @@ class PgmeMain(object):
 		
 		
 		f3 = f.readline() #self.a_list1
-		index = 0
 		if f3 != '[]\n':
 			f3 = f3.rstrip(']]\n')
 			f3 = f3.lstrip('[[')
 			f3 = f3.split('], [')
-			for i in f3:
+			for i in range(len(f3)):
 				self.a_list1.append([])
-				l = i.split(', ')
+				l = f3[i].split(', ')
 				for j in l:
 					if j is not '':
-						self.a_list1[index].append(self.v_list1[int(j)])
-				index += 1
-
+						self.a_list1[i].append(self.v_list1[int(j)])
 	
 		f4 = f.readline() #self.v_list2
 		if f4 != '[]\n':
@@ -176,20 +171,20 @@ class PgmeMain(object):
 				if j[0] is not '' and j[1] is not '':
 					self.v_list2.append(Vertex((int(j[0]),int(j[1]))))
 	
+
 		f5 = f.readline() #self.a_list2
-		index = 0
+
 		if f5 != '[]\n':
 			f5 = f5.rstrip(']]\n')
 			f5 = f5.lstrip('[[')
 			f5 = f5.split('], [')
-			for i in f5:
+			for i in range(len(f5)):
 				self.a_list2.append([])
-				l = i.split(', ')
+				l = f5[i].split(', ')
 				for j in l:
 					if j is not '':
-						self.a_list2[index].append(self.v_list2[int(j)])
-
-				index += 1
+						self.a_list2[i].append(self.v_list2[int(j)])
+		
 		
 		#force similarity
 		if f3 == f5:
@@ -210,19 +205,17 @@ class PgmeMain(object):
 		while True:
 
 			event = pygame.event.wait()
-			pos = pygame.mouse.get_pos()
+
 		
 			if event.type == pygame.QUIT:
 				sys.exit()
 
 			elif event.type == pygame.MOUSEBUTTONDOWN:
-
-				pressed = pygame.mouse.get_pressed()
-		
+				pos = event.pos
 				#for a left click, 
 				# add a vertex at the clicked coordinate (in the primary window)
 				# (and only when the loadfile screen isn't displayed)				
-				if pressed ==  (1,0,0) and (self.gwidth[0]+10) < pos[0] < \
+				if event.button ==  1 and (self.gwidth[0]+10) < pos[0] < \
 								(self.gwidth[1]-10) and 0 < pos[1] < self.height-20\
 								 and self.state == 0:
 
@@ -255,7 +248,7 @@ class PgmeMain(object):
 								
 
 
-				elif pressed == (1,0,0) and self.state == 2:
+				elif event.button == 1 and self.state == 2:
 					
 					select_file = None
 				
@@ -303,10 +296,10 @@ class PgmeMain(object):
 
 
 			elif event.type == pygame.MOUSEBUTTONUP:
-
+				pos = event.pos
 				#when a moved vertex is "dropped", 
 				#  update the vertex list and adjacency list
-				if pressed == (1,0,0) and self.move_vertex and \
+				if event.button == 1 and self.move_vertex and \
 						(self.gwidth[0]+10)< pos[0] < (self.gwidth[1]-10) and \
 						0 < pos[1] < self.height-40:
 					
@@ -320,7 +313,7 @@ class PgmeMain(object):
 						self.move_vertex = False
 
 					
-				elif pressed == (0,0,1) and self.current_graph == 1 \
+				elif event.button == 3 and self.current_graph == 1 \
 					 and (self.gwidth[0]+10) < pos[0] < (self.gwidth[1]-10) and \
 					 0 < pos[1] < self.height-20:
 					
@@ -380,19 +373,17 @@ class PgmeMain(object):
 					self.morph_ok = True	
 					self.v_list2 = []
 					self.a_list2 = []
-					index = 0
 					
 					for i in self.v_list1:
 						g2v = (i.xy[0]+int(self.width/2),i.xy[1])
 						self.v_list2.append(Vertex(g2v))
 						self.a_list2.append([])
 
-					for i in self.v_list2:					
-						for j in self.a_list1[index]:
-							self.a_list2[index].append(\
+					for i in range(len(self.v_list2)):					
+						for j in self.a_list1[i]:
+							self.a_list2[i].append(\
 									self.v_list2[self.v_list1.index(j)])
-
-						index += 1
+					
 
 				elif self.current_graph == 2 and self.v_list2!= []:
 					#after cloning, the graphs are similar, 
@@ -400,19 +391,16 @@ class PgmeMain(object):
 					self.morph_ok = True					
 					self.v_list1 = []
 					self.a_list1 = []
-					index = 0
 					
 					for i in self.v_list2:
 						g2v = (i.xy[0]-int(self.width/2),i.xy[1])
 						self.v_list1.append(Vertex(g2v))
 						self.a_list1.append([])
 
-					for i in self.v_list1:					
-						for j in self.a_list2[index]:
-							self.a_list1[index].append(\
+					for i in range(len(self.v_list1)):					
+						for j in self.a_list2[i]:
+							self.a_list1[i].append(\
 									self.v_list1[self.v_list2.index(j)])
-
-						index += 1
 
 			elif event.type == pygame.KEYDOWN and event.key == pygame.K_f:
 				tm = time.localtime(time.time())
@@ -472,15 +460,15 @@ class PgmeMain(object):
 		self.v_list_vector = []
 
 		#Calculate the xy speed vector
-		index = 0
-		for i in self.v_list1:
+
+		for i in range(len(self.v_list1)):
 		
-			dx = (self.v_list2[index].xy[0]-self.width/4)-(i.xy[0]+self.width/4)
-			dy = self.v_list2[index].xy[1]-i.xy[1]
+			dx = (self.v_list2[i].xy[0]-self.width/4)-\
+							(self.v_list1[i].xy[0]+self.width/4)
+			dy = self.v_list2[i].xy[1]-self.v_list1[i].xy[1]
 
 			self.v_list_vector.append((dx,dy))
 			
-			index +=1
 
 	
 	#
@@ -619,52 +607,44 @@ class PgmeMain(object):
 		# when one vertex is being moved, make sure not to draw the edges
 		# until it reaches its final destination
 		if self.move_vertex:
-			index_counter = 0
-			for i in self.a_list1:
+			for i in range(len(self.a_list1)):
 			
-				for j in i:
-					if j is not selected_vertex and self.v_list1[index_counter]\
+				for j in self.a_list1[i]:
+					if j is not selected_vertex and self.v_list1[i]\
 																	 is not selected_vertex:
 
-							pygame.draw.line(self.screen,LAV,self.v_list1[\
-														index_counter].xy,j.xy, 2)
+							pygame.draw.line(self.screen,LAV,self.v_list1[i].xy,j.xy, 2)
+
 					else:
 						for j in self.a_list1[self.selected_index]:
 							pygame.draw.line(self.screen,LAV,pos,j.xy, 2)
-				index_counter += 1
 			
 
-			index_counter = 0	
-			for i in self.a_list2:
+			for i in range(len(self.a_list2)):
 			
-				for j in i:
-					if j is not selected_vertex and self.v_list2[index_counter]\
+				for j in self.a_list2[i]:
+					if j is not selected_vertex and self.v_list2[i]\
 																	 is not selected_vertex:
 					
 							pygame.draw.line(self.screen,LAV,self.v_list2[\
-														index_counter].xy,j.xy, 2)
+														i].xy,j.xy, 2)
 					else:
 						for j in self.a_list2[self.selected_index]:
 							pygame.draw.line(self.screen,LAV,pos,j.xy, 2)
-				index_counter += 1
+
 	
 		else:
-			index_counter = 0
-			for i in self.a_list1:
-				for j in i:
+
+			for i in range(len(self.a_list1)):
+				for j in self.a_list1[i]:
 					pygame.draw.line(self.screen,LAV,self.v_list1[\
-												index_counter].xy,j.xy, 2)
+												i].xy,j.xy, 2)
 
-				index_counter += 1
-
-			index_counter = 0
-			for i in self.a_list2:
-				for j in i:
+			for i in range(len(self.a_list2)):
+				for j in self.a_list2[i]:
 					pygame.draw.line(self.screen,LAV,self.v_list2[\
-												index_counter].xy,j.xy, 2)
+												i].xy,j.xy, 2)
 
-				index_counter += 1
-		
 
 		#draw the vertices,
 		# if one in the list is the selected vertex, draw it a different colour,
@@ -673,7 +653,7 @@ class PgmeMain(object):
 			if i is not selected_vertex:
 				pygame.draw.circle(self.screen,AQUA,i.xy,8)
 			else:
-				if pygame.mouse.get_pressed() ==(1,0,0) and self.move_vertex:
+				if self.move_vertex:
 					pygame.draw.circle(self.screen,PEA,pos,8)
 				else:
 					pygame.draw.circle(self.screen,PEA,i.xy,8)
@@ -684,12 +664,10 @@ class PgmeMain(object):
 				pygame.draw.circle(self.screen,AQUA,i.xy,8)
 				
 			else:
-				if pygame.mouse.get_pressed() == (1,0,0) and self.move_vertex:
+				if self.move_vertex:
 					pygame.draw.circle(self.screen,PEA,pos,8)
 				else:
 					pygame.draw.circle(self.screen,PEA,i.xy,8)
-
-
 
 
 
@@ -702,19 +680,18 @@ class PgmeMain(object):
 		total = self.morph_time * self.FPS
 
 		# draw the animated graph
-		index = 0
-		for i in self.v_list1:
+		for i in range(len(self.v_list1)):
 			#calculate this frame's xy depending on the speed vector
 			# and the elapsed time			
-			dx = int(i.xy[0] + self.width/4 \
-					+ self.v_list_vector[index][0]*(elapsed/total))
+			dx = int(self.v_list1.xy[0] + self.width/4 \
+					+ self.v_list_vector[i][0]*(elapsed/total))
 					
-			dy = int(i.xy[1] + self.v_list_vector[index][1]*(elapsed/total))
+			dy = int(self.v_list1.xy[1] + self.v_list_vector[i][1]*(elapsed/total))
 			
 			
 			pygame.draw.circle(self.screen,AQUA,(dx,dy),8)
 			
-			for j in self.a_list1[index]:
+			for j in self.a_list1[i]:
 				dx_j = int(j.xy[0] + self.width/4 \
 						+ self.v_list_vector[self.v_list1.index(j)][0]\
 						*(elapsed/total))
@@ -724,18 +701,12 @@ class PgmeMain(object):
 				
 				pygame.draw.line(self.screen,LAV,(dx,dy),(dx_j,dy_j), 2)
 	
-			index += 1
-					
 
 
 		if time.time() - self.timer > self.morph_time:
 
 			self.morph = False
 			self.state = 0
-
-
-
-
 
 
 
