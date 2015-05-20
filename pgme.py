@@ -48,7 +48,7 @@ class PgmeMain(object):
         self.save_msg = self.msg_font.render("saved",True,CHALK)
         self.load_msg = self.msg_font.render("loaded",True,CHALK)
         
-        self.morph_ok_msg = self.msg_font.render("",True,CHALK)
+        self.morph_msg = self.msg_font.render("",True,CHALK)
         
 
         #State switch: Used to communicate board state to user 
@@ -85,7 +85,6 @@ class PgmeMain(object):
         self.move_vertex = False
 
         #morph varbales
-        self.morph_ok = False #check for conditions for morph
         self.morph = False #morph mode switch    
         self.morph_time = 5 #time it takes to animate the morph
 
@@ -187,12 +186,7 @@ class PgmeMain(object):
                 for j in l:
                     if j is not '':
                         self.a_list2[i].append(self.v_list2[int(j)])
-        
-        
-        #force similarity
-        if f3 == f5:
-            self.morph_ok = True
-
+ 
         self.timer = time.time()
         self.state = 3
 
@@ -334,7 +328,7 @@ class PgmeMain(object):
                         self.selected_index = None
                         self.move_vertex = False
 
-                    
+                # connecting two vertices with an edge    
                 elif event.button == 3 and self.current_graph == 1 \
                      and (self.gwidth[0]+10) < pos[0] < (self.gwidth[1]-10) and \
                      0 < pos[1] < self.height-20:
@@ -350,15 +344,24 @@ class PgmeMain(object):
                             elif self.selected_index is not None and \
                                     self.v_list1[self.selected_index] != i\
                                     and i not in self.a_list1[self.selected_index]:
-
+                                
+                                #join two different selected vertices with an edge in g1
                                 self.a_list1[self.selected_index].append(i)
                                 self.a_list1[self.v_list1.index(i)].append(\
                                         self.v_list1[self.selected_index])
                             
+                                #also join the same vertices in g2
+                                self.a_list2[self.selected_index].append(\
+                                        self.v_list2[self.v_list1.index(i)])
+                                self.a_list2[self.v_list1.index(i)].append(\
+                                        self.v_list2[self.selected_index])
+                                
+                                
+                                
                                 self.selected_index = None
                                 # after adding edges to g1 graphs are no longer similar,
                                 # so morphing cannot occur.                                
-                                self.morph_ok = False 
+                            
                             else:
                                 self.selected_index = None
                                 self.move_vertex = None
@@ -367,11 +370,9 @@ class PgmeMain(object):
                     self.move_vertex = None
 
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_d:
-                self.morph_ok = False
-                if self.current_graph == 1:
+             
                     self.v_list1 = []
                     self.a_list1 = []
-                elif self.current_graph ==2:
                     self.v_list2 = []
                     self.a_list2 = []
 
@@ -392,7 +393,7 @@ class PgmeMain(object):
                 if self.current_graph == 1 and self.v_list1 != []:
                     #after cloning, the graphs are similar, 
                     # thus morphing can happen                                    
-                    self.morph_ok = True    
+
                     self.v_list2 = []
                     self.a_list2 = []
                     
@@ -409,9 +410,7 @@ class PgmeMain(object):
                     
 
                 elif self.current_graph == 2 and self.v_list2!= []:
-                    #after cloning, the graphs are similar, 
-                    # thus morphing can happen                    
-                    self.morph_ok = True                    
+                  
                     self.v_list1 = []
                     self.a_list1 = []
                     
@@ -454,15 +453,10 @@ class PgmeMain(object):
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_m:            
                 self.timer= time.time()
 
-                if self.morph_ok:
-                    self.morph_ok_msg = self.msg_font.render\
+                self.morph_msg = self.msg_font.render\
                                 ("Morphing G1 to G2",True,CHALK)
-                    self.calc_morph()                    
-                    self.morph = True
-
-                else:        
-                    self.morph_ok_msg = self.msg_font.render\
-                                ("No morph: Graphs not simlar",True,CHALK)
+                self.calc_morph()                    
+                self.morph = True
 
 
                 self.state = 4    
@@ -619,7 +613,7 @@ class PgmeMain(object):
             self.state_msg(self.load_msg)
 
         elif self.state == 4:
-            self.state_msg(self.morph_ok_msg)
+            self.state_msg(self.morph_msg)
 
         
 
