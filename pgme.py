@@ -28,7 +28,7 @@ class Vertex(object):
 class PgmeMain(object):
     def __init__(self):
 
-      pygame.init()
+        pygame.init()
         self.width = 1500
         self.height = 700
         self.screen = pygame.display.set_mode((self.width, self.height))
@@ -237,11 +237,14 @@ class PgmeMain(object):
                                 
 
                         if add:
+                            pos2 = (pos[0]+ int(self.width/2),pos[1])
                             self.v_list1.append(Vertex(pos))
                             self.a_list1.append([])
                     
-                            self.v_list1.append(Vertex(pos))
-                            self.a_list1.append([])
+                            self.v_list2.append(Vertex(pos2))
+                            self.a_list2.append([])
+                            
+                            
                     elif self.selected_index is None and self.current_graph == 2:
                                         
                         for i in self.v_list2:
@@ -260,8 +263,8 @@ class PgmeMain(object):
                         add = False
                         for i in self.v_list1:
                         
-                            if ((i.xy[0] - 10) < pos[0] < (i.xy[0] + 10)) and \
-                                ((i.xy[1] - 10) < pos[1] < (i.xy[1] + 10)):                
+                            if ((i.xy[0]-10) < pos[0] < (i.xy[0]+10)) and \
+                                ((i.xy[1]-10) < pos[1] < (i.xy[1]+10)):                
                                 add = True
                         if add == False:
                             self.selected_index = None
@@ -432,7 +435,7 @@ class PgmeMain(object):
                                     str(tm.tm_min) + str(tm.tm_sec)+".graph"
 
                 f = open(filename,"w")
-                 f.write(str(self.count_v_and_e()) + "\n")
+                f.write(str(self.count_v_and_e()) + "\n")
                 f.write(str(self.v_list_coordinates(self.v_list1)) + "\n")
                 f.write(str(self.v_list_index(self.v_list1,self.a_list1)) + "\n")
                 f.write(str(self.v_list_coordinates(self.v_list2)) + "\n")
@@ -731,24 +734,26 @@ class PgmeMain(object):
 
         if m != k:
             for i in range(len(self.m_list[m])):
-                dx = int(self.m_list[m+1][i][0]*(elap%subtotal)/subtotal    + \
+                dx = int(self.m_list[m+1][i][0]*(elap%subtotal)/subtotal+ \
                     self.m_list[m][i][0]*(1-(elap%subtotal)/subtotal))
-                dy = int(self.m_list[m+1][i][1]*(elap%subtotal)/subtotal    + \
+                dy = int(self.m_list[m+1][i][1]*(elap%subtotal)/subtotal+ \
                     self.m_list[m][i][1]*(1-(elap%subtotal)/subtotal))
-
+                
+               # pygame.draw.circle(self.screen,AQUA,(dx,dy),8)        
+  
                 for j in self.a_list1[i]:
                     dx_j = int(\
-                            (self.m_list[m+1][self.v_list1.index(j)][0] * \
-                            (elap%subtotal)/subtotal) + \
+                            (self.m_list[m+1][self.v_list1.index(j)][0] *\
+                            (elap%subtotal)/subtotal) +\
                             (self.m_list[m][self.v_list1.index(j)][0] *\
                             (1-(elap%subtotal)/subtotal)))
                     dy_j = int(\
                             (self.m_list[m+1][self.v_list1.index(j)][1] *\
                             (elap%subtotal)/subtotal) +\
-                            (self.m_list[m][self.v_list1.index(j)][1] * \
+                            (self.m_list[m][self.v_list1.index(j)][1] *\
                             (1-(elap%subtotal)/subtotal)))
                             
-                          pygame.draw.line(self.screen,LAV,(dx,dy),(dx_j,dy_j), 2)
+                    pygame.draw.line(self.screen,LAV,(dx,dy),(dx_j,dy_j), 2)
           
                 pygame.draw.circle(self.screen,AQUA,(dx,dy),8)        
   
