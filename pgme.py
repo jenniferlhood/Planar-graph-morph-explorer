@@ -24,7 +24,6 @@ class Vertex(object):
     def __init__(self,(x,y)):
         self.xy = (x,y)
 
-
 class PgmeMain(object):
     def __init__(self):
 
@@ -455,7 +454,10 @@ class PgmeMain(object):
 
                 self.morph_msg = self.msg_font.render\
                                 ("Morphing G1 to G2",True,CHALK)
+              
+
                 self.calc_morph2()                    
+
                 self.morph = True
 
 
@@ -504,9 +506,6 @@ class PgmeMain(object):
 
         self.m_list.append(temp_vector_list)
         temp_vector_list = []
-
-
-
 
 
 
@@ -822,6 +821,10 @@ class PgmeMain(object):
                 dy = int(self.m_list[m+1][i][1]*(elap%subtotal)/subtotal+ \
                     self.m_list[m][i][1]*(1-(elap%subtotal)/subtotal))
                 
+
+
+               # pygame.draw.circle(self.screen,AQUA,(dx,dy),8)        
+
                 for j in self.a_list1[i]:
                     dx_j = int(\
                             (self.m_list[m+1][self.v_list1.index(j)][0] *\
@@ -842,10 +845,9 @@ class PgmeMain(object):
 
         if time.time() - self.timer > self.morph_time:
 
+
             self.morph = False
             self.state = 0
-
-      
 
         
 	
