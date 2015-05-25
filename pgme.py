@@ -526,61 +526,20 @@ class PgmeMain(object):
         
       
         for s in range(step):
-           # print "step", s
+           
+            print "s : ", s
             for i in range(len(self.v_list1)):
+                 
                 
                 # set the initial x and y displacement for vertex to 0
                 dx_a = 0 
                 dy_a = 0
-                
-                dx_r = 0
-                dy_r = 0
-                
-                #create a copy of a_list with the current vector's adjacent edges removed)
 
-                for j in range(len(self.a_list1):
-                    if j is not i:
-                        for k in self.a_list[j]:
-                            if k is not self.v_list1[i]:
-                            # 3 relevant vertices:
-                            # the current vertex (U) (really the vector OU)
-                            # an edge not connected to xb defined by
-                            # a line segment connected to two other vertices:
-                            # Va and Vc. Va and Vc are two vertices, not the current
-                            # and not any of the vertices listed in the adjacentcy
-                            # list of xb
-                            
-                                U = self.m_list[s][i]
-                                Va = self.m_list[s][self.v_list1.index(self.a_list[j][k])]
-                                Vc = self.m_list[s][j] 
-                                
-                            #the repellent vector (r) is given by:
-                            #
-                            # r = U - projV(U)
-                            #
-                            # with projV(U) as the orthogonal 
-                            # projection of vector OU on vector V. Vector V is 
-                            # given by:  
-                            #
-                            # Vc - Va
-                            #
-                            # Thus the final formual is (using o as the symbol for dot
-                            # product):
-                            #
-                            # r = U - ( (U o V)/(V o V) * V )
-                            #
-                            # The solution is found component-wise
-                                
-                                r_x = U[0] - ((U[0]*(Vc[0]-Va[0])+U[1]*(Vc[1]-Va[1]))/
-                                            (Vc[0]-Va[0])**2 + (Vc[1]-Va[1])**2)) */
-                                            (Vc[0]-Va[0])
-                                            
-                                r_y = U[1] - ((U[0]*(Vc[0]-Va[0])+U[1]*(Vc[1]-Va[1]))/
-                                            (Vc[0]-Va[0])**2 + (Vc[1]-Va[1])**2))*/
-                                            (Vc[1]-Va[1])
-                                            
-                                            
-                               
+                v_r = self.r_vector(i,s)
+                dx_r = v_r[0]
+                dy_r = v_r[1]                
+                 
+                print "vertex : ", i , " | repell vect: ", v_r[0]      
                 #sum difference vectors for attractive force
                 for j in range(len(self.a_list1[i])):
                 
@@ -598,9 +557,9 @@ class PgmeMain(object):
                     dy_a = dy_a + dy_j
                   
                     
-
-                temp_vector_list.append(((self.m_list[s][i][0]+self.fa(dx_a,s)),\
-                    (self.m_list[s][i][1]+self.fa(dy_a,s))))
+                print "repell force : ", self.fr(dx_r) 
+                temp_vector_list.append(((self.m_list[s][i][0]+self.fa(dx_a,s))+self.fr(dx_r),\
+                    (self.m_list[s][i][1]+self.fa(dy_a,s)+self.fr(dx_r))))
 
                                 
             self.m_list.append(temp_vector_list)
@@ -619,9 +578,11 @@ class PgmeMain(object):
     
     # generates repellent vector for vertex i at position s in the morph
     def r_vector(self,i,s): # i, index into v_list; s index into m_list
-        for j in range(len(self.a_list1):
+        dx_r = 0
+        dy_r = 0
+        for j in range(len(self.a_list1)):
             if j is not i:
-                for k in self.a_list[j]:
+                for k in self.a_list1[j]:
                     if k is not self.v_list1[i]:
                     # 3 relevant vertices:
                     # the current vertex (U) (really the vector OU)
@@ -632,7 +593,7 @@ class PgmeMain(object):
                     # list of xb
                             
                         U = self.m_list[s][i]
-                        Va = self.m_list[s][self.v_list1.index(self.a_list[j][k])]
+                        Va = self.m_list[s][self.v_list1.index(k)]
                         Vc = self.m_list[s][j] 
                                 
                         # the repellent vector (r) is given by:
@@ -650,18 +611,20 @@ class PgmeMain(object):
                         #
                         # The solution is found component-wise
                                 
-                        r_x = U[0] - ((U[0]*(Vc[0]-Va[0])+U[1]*(Vc[1]-Va[1]))/
-                              (Vc[0]-Va[0])**2 + (Vc[1]-Va[1])**2)) */
-                              (Vc[0]-Va[0])
+                        dx_k = U[0] - (((U[0]*(Vc[0]-Va[0])+U[1]*(Vc[1]-Va[1]))/
+                              ((Vc[0]-Va[0])**2 + (Vc[1]-Va[1])**2)) * (Vc[0]-Va[0]))
                                             
-                        r_y = U[1] - ((U[0]*(Vc[0]-Va[0])+U[1]*(Vc[1]-Va[1]))/
-                              (Vc[0]-Va[0])**2 + (Vc[1]-Va[1])**2))*/
-                              (Vc[1]-Va[1])
+                        dy_k = U[1] - (((U[0]*(Vc[0]-Va[0])+U[1]*(Vc[1]-Va[1]))/
+                              ((Vc[0]-Va[0])**2 + (Vc[1]-Va[1])**2))*(Vc[1]-Va[1]))
                               
+                        dx_r = dx_r + dx_k
+                        dy_r = dy_r + dy_k
+                          
+        return (dx_r,dy_r)    
     #vertex repulsive force (gaussian function)
     def fr(self,x):
         
-        return math.e**(-x**2/2)
+        return (math.e**(-x**2/2))
     
     #vertex attractive (spring) force (Hooke's law), plus 
     #dampening effect based on time step
