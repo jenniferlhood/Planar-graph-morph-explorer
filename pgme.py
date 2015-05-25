@@ -515,84 +515,159 @@ class PgmeMain(object):
 
         self.m_list = []
         temp_vector_list = []
-        k_list = []    
-
-        # add the first set of coordinates from G1 (v_list1)
+ 
+         # add the first set of coordinates from G1 (v_list1)
         for i in self.v_list1:
             temp_vector_list.append((i.xy[0]+self.width/4,i.xy[1]))        
 
         self.m_list.append(temp_vector_list)
         temp_vector_list = []
+        temp_edge_list = [] # for collecting all non adjacent edges
         
-        
-        
-
-      
-
-        # caculate the k values (spring constants) based on G2 edge lengths
-        for i in range(len(self.v_list2)):
-            k_list.append([])
-            for j in self.a_list2[i]:
-                dx = self.v_list2[i].xy[0] - j.xy[0]
-                dy = self.v_list2[i].xy[1] - j.xy[1]
-                k_list[i].append((dx,dy))
-
       
         for s in range(step):
-            print "step", s
+           # print "step", s
             for i in range(len(self.v_list1)):
                 
                 # set the initial x and y displacement for vertex to 0
-                dx = 0 
-                dy = 0
-                print "v",i
+                dx_a = 0 
+                dy_a = 0
+                
+                dx_r = 0
+                dy_r = 0
+                
+                #create a copy of a_list with the current vector's adjacent edges removed)
+
+                for j in range(len(self.a_list1):
+                    if j is not i:
+                        for k in self.a_list[j]:
+                            if k is not self.v_list1[i]:
+                            # 3 relevant vertices:
+                            # the current vertex (U) (really the vector OU)
+                            # an edge not connected to xb defined by
+                            # a line segment connected to two other vertices:
+                            # Va and Vc. Va and Vc are two vertices, not the current
+                            # and not any of the vertices listed in the adjacentcy
+                            # list of xb
+                            
+                                U = self.m_list[s][i]
+                                Va = self.m_list[s][self.v_list1.index(self.a_list[j][k])]
+                                Vc = self.m_list[s][j] 
+                                
+                            #the repellent vector (r) is given by:
+                            #
+                            # r = U - projV(U)
+                            #
+                            # with projV(U) as the orthogonal 
+                            # projection of vector OU on vector V. Vector V is 
+                            # given by:  
+                            #
+                            # Vc - Va
+                            #
+                            # Thus the final formual is (using o as the symbol for dot
+                            # product):
+                            #
+                            # r = U - ( (U o V)/(V o V) * V )
+                            #
+                            # The solution is found component-wise
+                                
+                                r_x = U[0] - ((U[0]*(Vc[0]-Va[0])+U[1]*(Vc[1]-Va[1]))/
+                                            (Vc[0]-Va[0])**2 + (Vc[1]-Va[1])**2)) */
+                                            (Vc[0]-Va[0])
+                                            
+                                r_y = U[1] - ((U[0]*(Vc[0]-Va[0])+U[1]*(Vc[1]-Va[1]))/
+                                            (Vc[0]-Va[0])**2 + (Vc[1]-Va[1])**2))*/
+                                            (Vc[1]-Va[1])
+                                            
+                                            
+                               
+                #sum difference vectors for attractive force
                 for j in range(len(self.a_list1[i])):
                 
                     #calculate displacement for each adjacent vector
-                    dx_j = (self.m_list[s][i][0] - self.m_list[s][self.v_list1.index(self.a_list1[i][j])][0])-\
+                    dx_j = (self.m_list[s][i][0] - \
+                        self.m_list[s][self.v_list1.index(self.a_list1[i][j])][0])-\
                         (self.v_list2[i].xy[0] - self.a_list2[i][j].xy[0])
-                    print "x displ", j, ":",  dx_j, 
-                    print "x pos :",self.m_list[s][i][0]
-                    
-                    dy_j = (self.m_list[s][i][1] - self.m_list[s][self.v_list1.index(self.a_list1[i][j])][1])-\
+
+                    dy_j = (self.m_list[s][i][1] - \
+                        self.m_list[s][self.v_list1.index(self.a_list1[i][j])][1])-\
                         (self.v_list2[i].xy[1] - self.a_list2[i][j].xy[1])
                     
                     #sum all the displacements       
-                    dx = dx + dx_j
-                    dy = dy + dy_j
+                    dx_a = dx_a + dx_j
+                    dy_a = dy_a + dy_j
+                  
                     
-                #"temperature" to dampen the spring effect with time
-                t = 1/(s+1)
-                
-                temp_vector_list.append(((self.m_list[s][i][0]+self.fa(dx)*t),(self.m_list[s][i][1]+self.fa(dy)*t)))
 
-                
-            #    print temp_vector_list 
-                
-                
+                temp_vector_list.append(((self.m_list[s][i][0]+self.fa(dx_a,s)),\
+                    (self.m_list[s][i][1]+self.fa(dy_a,s))))
+
+                                
             self.m_list.append(temp_vector_list)
             temp_vector_list = []
 
 
+
+
     # add the final set of coordinates from G2 v_list2
-#        for i in self.v_list2:
- #           temp_vector_list.append((i.xy[0]-self.width/4,i.xy[1]))        
+         #for i in self.v_list2:
+         #    temp_vector_list.append((i.xy[0]-self.width/4,i.xy[1]))        
 
-  #      self.m_list.append(temp_vector_list)
-   #     temp_vector_list = []
+        #self.m_list.append(temp_vector_list)
+        #temp_vector_list = []
 
-
-
-
-        #vertex repulsive force
-    def fr(self,k,x):
-        
-        return k**2/x
     
-    #vertex attractive (spring) force (Hooke's law)
-    def fa(self,x):
-        k=2
-        return (-1/k)*x
+    # generates repellent vector for vertex i at position s in the morph
+    def r_vector(self,i,s): # i, index into v_list; s index into m_list
+        for j in range(len(self.a_list1):
+            if j is not i:
+                for k in self.a_list[j]:
+                    if k is not self.v_list1[i]:
+                    # 3 relevant vertices:
+                    # the current vertex (U) (really the vector OU)
+                    # an edge not connected to xb defined by
+                    # a line segment connected to two other vertices:
+                    # Va and Vc. Va and Vc are two vertices, not the current
+                    # and not any of the vertices listed in the adjacentcy
+                    # list of xb
+                            
+                        U = self.m_list[s][i]
+                        Va = self.m_list[s][self.v_list1.index(self.a_list[j][k])]
+                        Vc = self.m_list[s][j] 
+                                
+                        # the repellent vector (r) is given by:
+                        #
+                        # r = U - projV(U)
+                        #
+                        # with projV(U) as vector orthogonal to the projection of U on V. 
+                        # Vector V is given by:  
+                        #
+                        # Vc - Va
+                        #
+                        # Thus the final formual is (using o as the dot product):
+                        #
+                        # r = U - ( (U o V)/(V o V) * V )
+                        #
+                        # The solution is found component-wise
+                                
+                        r_x = U[0] - ((U[0]*(Vc[0]-Va[0])+U[1]*(Vc[1]-Va[1]))/
+                              (Vc[0]-Va[0])**2 + (Vc[1]-Va[1])**2)) */
+                              (Vc[0]-Va[0])
+                                            
+                        r_y = U[1] - ((U[0]*(Vc[0]-Va[0])+U[1]*(Vc[1]-Va[1]))/
+                              (Vc[0]-Va[0])**2 + (Vc[1]-Va[1])**2))*/
+                              (Vc[1]-Va[1])
+                              
+    #vertex repulsive force (gaussian function)
+    def fr(self,x):
+        
+        return math.e**(-x**2/2)
+    
+    #vertex attractive (spring) force (Hooke's law), plus 
+    #dampening effect based on time step
+    def fa(self,x,s):
+        k=3
+        return ((-1/k)*x)*(1/(s+1))
  
     def state_msg(self,msg):
         #messages to user regarding program state
