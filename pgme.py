@@ -611,10 +611,10 @@ class PgmeMain(object):
                         #
                         # The solution is found component-wise
                                 
-                        dx_k = U[0] - (((U[0]*(Vc[0]-Va[0])+U[1]*(Vc[1]-Va[1]))/
+                        dx_k = (U[0]-Va[0]) - ((((U[0]-Va[0])*(Vc[0]-Va[0])+(U[1]-Va[1])*(Vc[1]-Va[1]))/
                               ((Vc[0]-Va[0])**2 + (Vc[1]-Va[1])**2)) * (Vc[0]-Va[0]))
                                             
-                        dy_k = U[1] - (((U[0]*(Vc[0]-Va[0])+U[1]*(Vc[1]-Va[1]))/
+                        dy_k = (U[1]-Va[1]) - ((((U[0]-Va[0])*(Vc[0]-Va[0])+(U[1]-Va[1])*(Vc[1]-Va[1]))/
                               ((Vc[0]-Va[0])**2 + (Vc[1]-Va[1])**2))*(Vc[1]-Va[1]))
                               
                         dx_r = dx_r + dx_k
